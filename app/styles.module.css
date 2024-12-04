@@ -78,3 +78,11 @@
     background: #005bb5;
   }
   
+  .Toastify__toast-container {
+    z-index: 9999 !important; /* Ensures it's on top */
+  }
+  
+  .Toastify__toast {
+    font-size: 16px; /* Optional: Customize the font size */
+    padding: 10px 15px; /* Optional: Customize padding */
+  }
