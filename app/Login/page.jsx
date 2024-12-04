@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
@@ -8,34 +9,39 @@ const LoginPage = () => {
   const router = useRouter();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch('http://localhost:8082/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await axios.post('http://localhost:8082/login', {
+      email,
+      password,
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.dashboard === 'admin') {
-          console.log(data)
-          router.push('/adminDash');
-        } else {
-          router.push('/userDash');
-        }
+    // Log the entire response object to the terminal
+    console.log('Response from server:', response);
+
+    const data = response.data; // Axios automatically parses JSON
+    console.log('Parsed response data:', data); // Log the parsed response data
+
+    if (data.dashboard) {
+      if (data.dashboard === 'admin') {
+        console.log('Redirecting to admin dashboard...');
+        router.push('/adminDash');
       } else {
-        alert('Invalid login credentials. Please try again.');
+        console.log('Redirecting to user dashboard...');
+        router.push('/userDash');
       }
-    } catch (error) {
-      console.error('Error logging in:', error);
-      alert('An error occurred. Please try again.');
+    } else {
+      console.log('Invalid login credentials.');
+      alert('Invalid login credentials. Please try again.');
     }
-  };
-
+  } catch (error) {
+    console.error('Error logging in:', error.response || error.message);
+    alert(
+      error.response?.data?.message || 'An error occurred. Please try again.'
+    );
+  }
+};
   return (
     <div className="container">
       <div className="form-container">
