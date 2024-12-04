@@ -21,7 +21,8 @@ const LoginPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.role === 'admin') {
+        if (data.dashboard === 'admin') {
+          console.log(data)
           router.push('/adminDash');
         } else {
           router.push('/userDash');
