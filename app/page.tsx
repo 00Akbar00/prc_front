@@ -1,10 +1,8 @@
 import Image from "next/image";
+import LoginPage from './Login/page';
 
 export default function Home() {
   return (
-   <div>
-    
-    <h2>hello this is my app</h2>
-   </div>
+   <LoginPage/>
   );
 }
