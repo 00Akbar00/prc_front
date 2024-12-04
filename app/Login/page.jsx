@@ -1,16 +1,59 @@
-// pages/signup.js
-
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('http://localhost:8082/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.role === 'admin') {
+          router.push('/adminDash');
+        } else {
+          router.push('/userDash');
+        }
+      } else {
+        alert('Invalid login credentials. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('An error occurred. Please try again.');
+    }
+  };
+
   return (
-    <body className="container">
+    <div className="container">
       <div className="form-container">
-        <form className="signup-form">
+        <form className="signup-form" onSubmit={handleLogin}>
           <h2>Sign In</h2>
-          <input type="email" placeholder="Email" required />
-          <input type="password" placeholder="Password" required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           <button type="submit">Login</button>
         </form>
       </div>
@@ -44,7 +87,7 @@ const LoginPage = () => {
         .signup-form h2 {
           margin-bottom: 1rem;
           text-align: center;
-          color:black;
+          color: black;
         }
 
         .signup-form input {
@@ -64,12 +107,12 @@ const LoginPage = () => {
           font-size: 1rem;
           cursor: pointer;
         }
-        
+
         .signup-form button:hover {
           background-color: #005bb5;
         }
       `}</style>
-    </body>
+    </div>
   );
 };
 
