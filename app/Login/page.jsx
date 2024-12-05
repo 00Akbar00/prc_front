@@ -32,6 +32,13 @@ const LoginPage = () => {
           hideProgressBar: true,
           theme: "colored", // Optional: Adds a colored theme to the toast
         });
+        // Navigate based on the dashboard type
+        if (data.dashboard === "admin") {
+          router.push("/adminDash"); // Redirect to admin dashboard
+        } else if (data.dashboard === "user") {
+          router.push("/userDash"); // Redirect to user dashboard
+        }
+
       } else {
         console.log("Error toast triggered");
         toast.error(data.message || "Login failed. Please try again.", {
