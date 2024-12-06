@@ -7,6 +7,7 @@ import * as Yup from "yup";
 import styles from "../styles.module.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { setCookie } from 'nookies'; 
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
@@ -14,38 +15,46 @@ const LoginPage = () => {
 
   const handleLogin = async (values) => {
     setLoading(true);
-
+  
     try {
       const response = await axios.post(
         "http://localhost:8082/login",
         values,
         { withCredentials: false }
       );
-
+  
       const data = response.data;
-
+      console.log(data);
+  
       if (data.success) {
+
+        setCookie(null, 'user', JSON.stringify(data.user), { path: '/' });
+        setCookie(null, 'role', data.role, { path: '/' });
+        // Store user data in localStorage or context
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store user info
+        localStorage.setItem('role', data.role); // Store role info
+  
         console.log("Success toast triggered");
         toast.success("Login successful!", {
-          position: "top-right", // Position toast on the top-right
+          position: "top-right", 
           autoClose: 3000,
           hideProgressBar: true,
-          theme: "colored", // Optional: Adds a colored theme to the toast
+          theme: "colored",
         });
-        // Navigate based on the dashboard type
-        if (data.dashboard === "admin") {
+  
+        // Navigate based on the dashboard type only after successful login
+        if (data.role === "admin") {
           router.push("/adminDash"); // Redirect to admin dashboard
-        } else if (data.dashboard === "user") {
+        } else if (data.role === "user") {
           router.push("/userDash"); // Redirect to user dashboard
         }
-
       } else {
         console.log("Error toast triggered");
         toast.error(data.message || "Login failed. Please try again.", {
-          position: "top-right", // Position toast on the top-right
+          position: "top-right", 
           autoClose: 3000,
           hideProgressBar: true,
-          theme: "colored", // Optional: Adds a colored theme to the toast
+          theme: "colored",
         });
       }
     } catch (error) {
@@ -53,16 +62,18 @@ const LoginPage = () => {
         error.response?.data?.message ||
           "An unexpected error occurred. Please try again.",
         {
-          position: "top-right", // Position toast on the top-right
+          position: "top-right", 
           autoClose: 3000,
           hideProgressBar: true,
-          theme: "colored", // Optional: Adds a colored theme to the toast
+          theme: "colored", 
         }
       );
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
   const formik = useFormik({
     initialValues: {
