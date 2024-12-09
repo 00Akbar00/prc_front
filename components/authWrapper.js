@@ -8,26 +8,26 @@ const AuthWrapper = ({ children, requiredRole }) => {
   const [mounted, setMounted] = useState(false); // Track if the component is mounted
 
   useEffect(() => {
-    setMounted(true); // Set mounted to true after component has mounted
+    setMounted(true); 
   }, []);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const role = localStorage.getItem('role');
 
   useEffect(() => {
-    if (!mounted) return; // Prevent running this logic before the component is mounted
+    if (!mounted) return; 
 
     if (!user) {
-      router.push('/'); // Redirect to login if not logged in
+      router.push('/'); 
     } else if (requiredRole && role !== requiredRole) {
-      router.push('/unauthorized'); // Redirect if role doesn't match
+      router.push('/unauthorized'); 
     } else {
-      setLoading(false); // Allow rendering of the page if user is authorized
+      setLoading(false); 
     }
   }, [mounted, user, role, requiredRole, router]);
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading while checking
+    return <div>Loading...</div>; 
   }
 
   // Render children if authorized and role matches
