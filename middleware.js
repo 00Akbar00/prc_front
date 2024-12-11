@@ -8,27 +8,34 @@ export function middleware(req) {
 
   const url = req.url;
 
-  // Check if the user is logged in
+  // Redirect to login if the user is not logged in
   if (!user || !user.id) {
-    return NextResponse.redirect(new URL('/', req.url)); // Redirect to login
+    // Clear cookies if the user is not logged in
+    const response = NextResponse.redirect(new URL('/', req.url));
+    //response.cookies.set('user', '', { path: '/', maxAge: -1 }); // Expire user cookie
+   // response.cookies.set('role', '', { path: '/', maxAge: -1 }); // Expire role cookie
+    return response;
   }
 
   // Role-based access control
   if ((url.includes('/userDash') && role !== 'user') || 
       (url.includes('/adminDash') && role !== 'admin')) {
-    // Respond with a JSON message instead of redirecting
-    return new NextResponse(
-      JSON.stringify({ message: 'You are not authorized to access this page.' ,status:403}),
+    // Expire cookies if unauthorized access is attempted
+    const response = new NextResponse(
+      JSON.stringify({ message: 'You are not authorized to access this page.', status: 403 }),
       {
         status: 403, // Forbidden
         headers: { 'Content-Type': 'application/json' },
       }
     );
+    response.cookies.set('user', '', { path: '/', maxAge: -1 }); // Expire user cookie
+    response.cookies.set('role', '', { path: '/', maxAge: -1 }); // Expire role cookie
+    return response;
   }
 
   return NextResponse.next(); // Allow the request to proceed
 }
 
 export const config = {
-  matcher: ['/adminDash', '/userDash'], // Protect these routes
+  matcher: ['/userDash'], // Protect these routes
 };

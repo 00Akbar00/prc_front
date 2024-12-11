@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@rewind-ui/core": "^0.20.0",
     "axios": "^1.7.9",
     "cookie": "^1.0.2",
     "formik": "^2.4.6",

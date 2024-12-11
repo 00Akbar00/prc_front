@@ -1,49 +1,91 @@
 'use client'; // Ensure this is a Client Component
 
 import React from 'react';
+import { useFormik } from 'formik';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import LogoutButton from '../../components/logoutButton';
 
-export default function adminDash() {
+export default function AdminDash() {
+  // Handling form submission with Formik
+  const formik = useFormik({
+    initialValues: {
+      user: '',
+      role: '',
+      department: ''
+    },
+    onSubmit: values => {
+      toast.success('Form submitted successfully!');
+      console.log(values);
+    },
+  });
+
   return (
-    <div className="container">
-      <div className="top-right">
-        <LogoutButton
-          label="Logout"
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#0070f3",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        />
-      </div>
-      <h1>UserDash</h1>
+    <div>
+      {/* Toastify container */}
+      <ToastContainer />
 
-      <style jsx>{`
-        .container {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          background-color: #f0f0f0;
-          position: relative;
-        }
+      {/* Navbar */}
+      <nav className="navbar">
+        <ul>
+          <li>
+            <button onClick={() => toast.info('User button clicked')}>
+              Users
+            </button>
+          </li>
+          <li>
+            <button onClick={() => toast.info('Roles button clicked')}>
+              Roles
+            </button>
+          </li>
+          <li>
+            <button onClick={() => toast.info('Departments button clicked')}>
+              Departments
+            </button>
+          </li>
+        </ul>
+      </nav>
 
-        .top-right {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-        }
+      {/* Form (using Formik) */}
+      <form onSubmit={formik.handleSubmit}>
+        <div>
+          <label htmlFor="user">User</label>
+          <input
+            id="user"
+            name="user"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.user}
+          />
+        </div>
 
-        h1 {
-          font-size: 3rem;
-          font-weight: bold;
-          color: #333;
-        }
-      `}</style>
+        <div>
+          <label htmlFor="role">Role</label>
+          <input
+            id="role"
+            name="role"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.role}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="department">Department</label>
+          <input
+            id="department"
+            name="department"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.department}
+          />
+        </div>
+
+        <button type="submit">Submit</button>
+      </form>
+
+      {/* Logout Button */}
+      <LogoutButton />
     </div>
   );
 }

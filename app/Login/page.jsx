@@ -27,9 +27,26 @@ const LoginPage = () => {
       console.log(data);
   
       if (data.success) {
-
-        setCookie(null, 'user', JSON.stringify(data.user), { path: '/' });
-        setCookie(null, 'role', data.role, { path: '/' });
+        // Set cookies with an expiration time (1 week)
+        const expiresIn = new Date();
+        expiresIn.setTime(expiresIn.getTime() + 60 * 60 * 24 * 7 * 1000); // 1 week from now
+  
+        // Set the cookies with the correct expiration date
+        setCookie(null, 'user', JSON.stringify(data.user), {
+          path: '/', 
+          expires: expiresIn, // Set expiration date for the cookie
+          secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+          httpOnly: false, // Allows JavaScript access to the cookie
+          sameSite: 'Lax', // SameSite policy for cross-site requests
+        });
+        setCookie(null, 'role', data.role, {
+          path: '/', 
+          expires: expiresIn, // Set expiration date for the cookie
+          secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+          httpOnly: false, // Allows JavaScript access to the cookie
+          sameSite: 'Lax', // SameSite policy for cross-site requests
+        });
+  
         // Store user data in localStorage or context
         localStorage.setItem('user', JSON.stringify(data.user)); // Store user info
         localStorage.setItem('role', data.role); // Store role info
@@ -72,6 +89,7 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+  
   
   
 
