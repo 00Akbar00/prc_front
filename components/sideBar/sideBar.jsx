@@ -7,9 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 export default function SideBar({ onSectionChange }) {
   const handleButtonClick = (buttonName) => {
     onSectionChange(buttonName);
-    toast.success(`${buttonName} section selected!`, {
-      position: toast.POSITION.TOP_CENTER,
-    });
   };
 
   return (
