@@ -8,25 +8,28 @@ const AddUser = ({ styles }) => {
     name: '',
     email: '',
     password: '',
-    departments: [], // Array for multiple selected departments
-    roles: [], // Array for multiple selected roles
+    departments: [], // Array for selected departments
+    roles: [], // Array for selected roles
   });
   const [departments, setDepartments] = useState([]); // Departments from backend
   const [roles, setRoles] = useState([]); // Roles from backend
-  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const [loading, setLoading] = useState(true); // Loading state
+  const [dropdownVisible, setDropdownVisible] = useState(false); // Toggle for dropdown visibility
+  const [selectedOptionType, setSelectedOptionType] = useState(''); // Track whether user is selecting departments or roles
+  const [searchQuery, setSearchQuery] = useState(''); // For filtering dropdown options
 
-  // Fetch departments and roles when the component loads
   useEffect(() => {
     const fetchData = async () => {
       try {
         const departmentsResponse = await getDepartments();
-        setDepartments(departmentsResponse?.data || []); // Ensure it's an array
+        setDepartments(departmentsResponse?.data?.departments || []);
+
         const rolesResponse = await getRoles();
-        setRoles(rolesResponse?.data || []); // Ensure it's an array
-        setLoading(false); // Data is fetched, no longer loading
+        setRoles(rolesResponse?.data?.roles || []);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setLoading(false); // Stop loading in case of error
+        setLoading(false);
       }
     };
 
@@ -42,25 +45,63 @@ const AddUser = ({ styles }) => {
     }));
   };
 
-  // Handle multi-select changes (for roles and departments)
-  const handleSelectChange = (e) => {
-    const { name, options } = e.target;
-    const selectedValues = Array.from(options)
-      .filter(option => option.selected)
-      .map(option => option.value);
+  // Toggle dropdown visibility
+  const handleInputClick = (type) => {
+    setSelectedOptionType(type); // Determine whether it's departments or roles dropdown
+    setDropdownVisible(!dropdownVisible);
+  };
+
+  // Handle selection of an item (department or role)
+  const handleSelectItem = (item) => {
+    if (selectedOptionType === 'departments') {
+      setFormData(prevData => ({
+        ...prevData,
+        departments: [...prevData.departments, item.id],
+      }));
+    } else if (selectedOptionType === 'roles') {
+      setFormData(prevData => ({
+        ...prevData,
+        roles: [...prevData.roles, item.id],
+      }));
+    }
+    setSearchQuery(''); // Reset search query after selecting
+    setDropdownVisible(false); // Hide dropdown
+  };
+
+  // Handle removing a selected item
+  const removeSelectedItem = (name, value) => {
     setFormData(prevData => ({
       ...prevData,
-      [name]: selectedValues,
+      [name]: prevData[name].filter(item => item !== value),
     }));
+  };
+
+  // Filter departments or roles based on search query
+  const filterOptions = (options) => {
+    return options.filter(option =>
+      option.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  // Handle search input
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   // Handle form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    // Prepare the payload with the correct field names
+    const payload = {
+      ...formData,
+      roleIds: formData.roles, // Rename 'roles' to 'roleIds'
+      departmentIds: formData.departments, // Rename 'departments' to 'departmentIds'
+    };
+
     try {
-      const response = await createUser(formData); // Assuming createUser is an API function
+      const response = await createUser(payload); // Pass the modified payload
       alert('User created successfully!');
-      // Optionally, reset form data or navigate to another page
     } catch (error) {
       console.error('Error creating user:', error);
       alert('Error creating user');
@@ -68,7 +109,7 @@ const AddUser = ({ styles }) => {
   };
 
   if (loading) {
-    return <div>Loading departments and roles...</div>; // Show loading message while fetching
+    return <div>Loading departments and roles...</div>;
   }
 
   return (
@@ -117,46 +158,105 @@ const AddUser = ({ styles }) => {
         />
       </div>
 
-      {/* Department Select */}
+      {/* Departments Field */}
       <div style={styles.formGroup}>
         <label htmlFor="departments">Departments:</label>
-        <select
-          id="departments"
-          name="departments"
-          multiple
-          value={formData.departments}
-          onChange={handleSelectChange}
-          required
-          style={styles.select}
+        <div
+          style={styles.selectInput}
+          onClick={() => handleInputClick('departments')}
         >
-          <option value="">Select Departments</option>
-          {Array.isArray(departments) && departments.map((department) => (
-            <option key={department.id} value={department.id}>
-              {department.name}
-            </option>
-          ))}
-        </select>
+          {formData.departments.map(id => {
+            const department = departments.find(d => d.id === id);
+            return (
+              department && (
+                <span key={id} style={styles.tag}>
+                  {department.name}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent input field click
+                      removeSelectedItem('departments', id); // Remove selected department
+                    }}
+                    style={styles.removeTagButton}
+                  >
+                    x
+                  </button>
+                </span>
+              )
+            );
+          })}
+          {formData.departments.length === 0 && <span>Select Departments</span>}
+        </div>
+
+        {dropdownVisible && selectedOptionType === 'departments' && (
+          <div style={styles.dropdown}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search departments"
+              style={styles.dropdownSearch}
+            />
+            {filterOptions(departments).map(department => (
+              <div
+                key={department.id}
+                style={styles.dropdownItem}
+                onClick={() => handleSelectItem(department)}
+              >
+                {department.name}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Role Select */}
+      {/* Roles Field */}
       <div style={styles.formGroup}>
         <label htmlFor="roles">Roles:</label>
-        <select
-          id="roles"
-          name="roles"
-          multiple
-          value={formData.roles}
-          onChange={handleSelectChange}
-          required
-          style={styles.select}
+        <div
+          style={styles.selectInput}
+          onClick={() => handleInputClick('roles')}
         >
-          <option value="">Select Roles</option>
-          {Array.isArray(roles) && roles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {role.name}
-            </option>
-          ))}
-        </select>
+          {formData.roles.map(id => {
+            const role = roles.find(r => r.id === id);
+            return (
+              role && (
+                <span key={id} style={styles.tag}>
+                  {role.name}
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedItem('roles', id)}
+                    style={styles.removeTagButton}
+                  >
+                    x
+                  </button>
+                </span>
+              )
+            );
+          })}
+          {formData.roles.length === 0 && <span>Select Roles</span>}
+        </div>
+
+        {dropdownVisible && selectedOptionType === 'roles' && (
+          <div style={styles.dropdown}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search roles"
+              style={styles.dropdownSearch}
+            />
+            {filterOptions(roles).map(role => (
+              <div
+                key={role.id}
+                style={styles.dropdownItem}
+                onClick={() => handleSelectItem(role)}
+              >
+                {role.name}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}

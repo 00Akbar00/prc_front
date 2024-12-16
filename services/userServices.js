@@ -7,17 +7,18 @@ export const getUsers = async () => {
 };
 
 // Function to add a user
-export const addUser = async (payload) => {
+// userServices.js
+
+export const createUser = async (payload) => {
   try {
-    const response = await axios.post(
-      "http://localhost:8082/addUser",
-      payload // Send user data: { name, email, password, departmentId, roleId }
-    );
+    const response = await axios.post('http://localhost:8082/addUser', payload);
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, message: error.response?.data?.message || error.message };
   }
 };
+
+
 
 // Function to delete a user
 export const deleteUser = async (id) => {

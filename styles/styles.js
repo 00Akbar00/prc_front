@@ -129,5 +129,78 @@ export const styles = {
     tableRowHover: {
       backgroundColor: "#f1f1f1", // Adds hover effect
     },
+    form: {
+      width: '80%',
+      margin: '0 auto',
+    },
+    formGroup: {
+      marginBottom: '15px',
+    },
+    input: {
+      width: '100%',
+      padding: '8px',
+      margin: '5px 0',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+    },
+    selectInput: {
+      width: '100%',
+      padding: '8px',
+      margin: '5px 0',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      minHeight: '40px',
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+    },
+    tag: {
+      backgroundColor: '#e0e0e0',
+      margin: '3px',
+      padding: '5px 10px',
+      borderRadius: '15px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    removeTagButton: {
+      marginLeft: '5px',
+      background: 'transparent',
+      border: 'none',
+      cursor: 'pointer',
+    },
+    dropdown: {
+      position: 'absolute',
+      backgroundColor: 'white',
+      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+      borderRadius: '4px',
+      zIndex: 10,
+      width: '100%',
+      maxHeight: '200px',
+      overflowY: 'auto',
+      marginTop: '5px',
+      border: '1px solid #ccc',
+    },
+    dropdownSearch: {
+      width: '100%',
+      padding: '8px',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      marginBottom: '5px',
+    },
+    dropdownItem: {
+      padding: '10px',
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: '#f1f1f1',
+      },
+    },
+    submitButton: {
+      padding: '10px 20px',
+      backgroundColor: '#4caf50',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+    },
     
   };
