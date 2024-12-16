@@ -94,30 +94,40 @@ export const styles = {
       transition: 'background-color 0.3s ease, transform 0.2s ease',
     },
     tableContainer: {
-      backgroundColor: '#ffffff',
-      borderRadius: '12px',
-      padding: '25px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-      color: '#333333',
+      margin: "20px",
+      overflowX: "auto",
+      padding: "20px",
+      backgroundColor: "#f9f9f9",
+      borderRadius: "8px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     },
     table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      marginTop: '20px',
+      width: "100%",
+      borderCollapse: "collapse",
+      fontFamily: "'Arial', sans-serif",
+      borderRadius: "8px",
+      overflow: "hidden",
     },
     tableHeader: {
-      backgroundColor: '#f8f9fa',
-      fontWeight: 'bold',
-      textAlign: 'left',
-      padding: '12px',
-      border: '1px solid #dee2e6',
-      fontSize: '16px',
+      backgroundColor: "#007bff",
+      color: "white",
+      padding: "12px 15px",
+      textAlign: "left",
+      fontSize: "16px",
     },
     tableCell: {
-      padding: '12px',
-      border: '1px solid #dee2e6',
-      fontSize: '16px',
-      color: '#333333',
+      padding: "12px 15px",
+      textAlign: "left",
+      borderBottom: "1px solid #ddd",
+      wordBreak: "break-word", // Ensures long text wraps
+      maxWidth: "300px", // Controls max width of the cell to prevent overflow
+    },
+    tableRow: {
+      cursor: "pointer",
+      transition: "background-color 0.3s",
+    },
+    tableRowHover: {
+      backgroundColor: "#f1f1f1", // Adds hover effect
     },
     
   };

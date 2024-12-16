@@ -1,63 +1,82 @@
-import React, { useState } from 'react';
-import { deleteDepartment } from '../../services/departmentServices'; // API service to delete department
-import { styles } from '../../styles/styles'; // Styles for the component
+import React, { useState, useEffect } from 'react';
+import { getDepartments, deleteDepartment } from '../../services/departmentServices'; // API services
+import { styles } from '../../styles/styles'; // Import your styles
 
-const DeleteDepartment = () => {
-  
-  const [departmentId, setDepartmentId] = useState('');
+const DepartmentListWithDelete = () => {
+  const [departments, setDepartments] = useState([]); // State for department list
+  const [loading, setLoading] = useState(true); // State for loading indicator
 
-  
-  const handleInputChange = (event) => {
-    setDepartmentId(event.target.value); 
-  };
+  // Fetch departments when the component loads
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await getDepartments();
+        setDepartments(response.data.departments); // Populate department list
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setLoading(false);
+      }
+    };
 
-  
-  const handleDeleteDepartment = async (event) => {
-    event.preventDefault(); 
+    fetchDepartments();
+  }, []);
 
-    // Validate input: Make sure departmentId is not empty
-    if (!departmentId) {
-      return alert('Please enter a valid Department ID');
+  // Function to handle deletion of a department
+  const handleDelete = async (departmentId) => {
+    if (!window.confirm('Are you sure you want to delete this department?')) {
+      return; // Confirm before deleting
     }
 
     try {
-      // Call the delete API function and pass the departmentId
+      // Call the delete API function
       const response = await deleteDepartment(departmentId);
-      
-      // Display a success message on successful deletion
       alert(response?.message || 'Department deleted successfully');
-      
-      // Reset the input field after successful deletion
-      setDepartmentId('');
+
+      // Update the department list after deletion
+      setDepartments(departments.filter((dept) => dept.id !== departmentId));
     } catch (error) {
-      // Handle any errors and display an error message
       console.error('Error deleting department:', error);
-      //alert('Failed to delete department');
+      alert('Failed to delete department');
     }
   };
 
+  // Show a loading message while fetching data
+  if (loading) {
+    return <div>Loading departments...</div>;
+  }
+
+  // Render the department list with a delete button for each department
   return (
-    <form style={styles.form} onSubmit={handleDeleteDepartment}>
-      <h2>Delete Department</h2>
-      
-      <div style={styles.formGroup}>
-        <label htmlFor="departmentId">Department ID:</label>
-        <input
-          type="text"
-          id="departmentId"
-          name="departmentId"
-          value={departmentId} // Use state value for input field
-          onChange={handleInputChange} // Handle input change
-          required
-          style={styles.input}
-        />
-      </div>
-      
-      <button type="submit" style={styles.deleteButton}>
-        Delete Department
-      </button>
-    </form>
+    <div style={styles.tableContainer}>
+      <h2>Departments</h2>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.tableHeader}>Department ID</th>
+            <th style={styles.tableHeader}>Department Name</th>
+            <th style={styles.tableHeader}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {departments.map((department) => (
+            <tr key={department.id}> {/* Use department.id as the key */}
+              <td>{department.id}</td> {/* Display department ID */}
+              <td>{department.name}</td> {/* Display department name */}
+              <td>
+                <button
+                  style={styles.deleteButton} // Use a red button style
+                  onClick={() => handleDelete(department.id)} // Call handleDelete with department ID
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
-export default DeleteDepartment;
+export default DepartmentListWithDelete;

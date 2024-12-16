@@ -1,61 +1,82 @@
-import React, { useState } from 'react';
-import { deleteRole } from '../../services/roleServices'; // API service to delete role
-import { styles } from '../../styles/styles'; // Styles for the component
+import React, { useState, useEffect } from 'react';
+import { getRoles, deleteRole } from '../../services/roleServices'; // Role service functions
+import { styles } from '../../styles/styles'; // Updated styles
 
-const DeleteRole = () => {
-  
-  const [roleId, setRoleId] = useState('');  // Changed departmentId to roleId
+const RoleListWithDelete = () => {
+  const [roles, setRoles] = useState([]); // State for the role list
+  const [loading, setLoading] = useState(true); // State for loading indicator
 
-  const handleInputChange = (event) => {
-    setRoleId(event.target.value);  // Update state for roleId
-  };
+  // Fetch roles when the component loads
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await getRoles();
+        setRoles(response.data.roles); // Populate role list
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        setLoading(false);
+      }
+    };
 
-  const handleDeleteRole = async (event) => {
-    event.preventDefault(); 
+    fetchRoles();
+  }, []);
 
-    // Validate input: Make sure roleId is not empty
-    if (!roleId) {
-      return alert('Please enter a valid Role ID');
+  // Function to handle deletion of a role
+  const handleDelete = async (roleId) => {
+    if (!window.confirm('Are you sure you want to delete this role?')) {
+      return; // Confirm before deleting
     }
 
     try {
-      // Call the delete API function and pass the roleId
-      const response = await deleteRole(roleId);  // Call deleteRole instead of deleteDepartment
-      
-      // Display a success message on successful deletion
+      // Call the delete API function
+      const response = await deleteRole(roleId);
       alert(response?.message || 'Role deleted successfully');
-      
-      // Reset the input field after successful deletion
-      setRoleId('');
+
+      // Update the role list after deletion
+      setRoles(roles.filter((role) => role.id !== roleId));
     } catch (error) {
-      // Handle any errors and display an error message
       console.error('Error deleting role:', error);
       alert('Failed to delete role');
     }
   };
 
+  // Show a loading message while fetching data
+  if (loading) {
+    return <div>Loading roles...</div>;
+  }
+
+  // Render the role list with a delete button for each role
   return (
-    <form style={styles.form} onSubmit={handleDeleteRole}>  {/* Handle deleteRole */}
-      <h2>Delete Role</h2>  {/* Change heading to Delete Role */}
-      
-      <div style={styles.formGroup}>
-        <label htmlFor="roleId">Role ID:</label>  {/* Change label to Role ID */}
-        <input
-          type="text"
-          id="roleId"  
-          name="roleId" 
-          value={roleId}  // Use state value for input field
-          onChange={handleInputChange}  // Handle input change
-          required
-          style={styles.input}
-        />
-      </div>
-      
-      <button type="submit" style={styles.deleteButton}>
-        Delete Role  {/* Change button text to Delete Role */}
-      </button>
-    </form>
+    <div style={styles.tableContainer}>
+      <h2>Roles</h2>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th style={styles.tableHeader}>Role ID</th>
+            <th style={styles.tableHeader}>Role Name</th>
+            <th style={styles.tableHeader}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {roles.map((role) => (
+            <tr key={role.id}> {/* Use role.id as the key */}
+              <td style={styles.tableCell}>{role.id}</td>
+              <td style={styles.tableCell}>{role.name}</td>
+              <td style={styles.tableCell}>
+                <button
+                  style={styles.deleteButton} // Use a red button style
+                  onClick={() => handleDelete(role.id)} // Call handleDelete with role ID
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
-export default DeleteRole;
+export default RoleListWithDelete;
