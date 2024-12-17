@@ -3,6 +3,7 @@
 import React from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LogoutButton from '../logoutButton'; // Import LogoutButton component
 
 export default function SideBar({ onSectionChange }) {
   const handleButtonClick = (buttonName) => {
@@ -29,6 +30,14 @@ export default function SideBar({ onSectionChange }) {
       >
         Department
       </button>
+
+      {/* Add LogoutButton here */}
+      <LogoutButton
+        label="Logout"
+        style={styles.logoutButton}
+        className="logout-button"
+      />
+
       <ToastContainer />
     </div>
   );
@@ -51,6 +60,18 @@ const styles = {
     padding: "12px 20px",
     margin: "12px 0",
     backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "16px",
+    transition: "background-color 0.3s ease, transform 0.2s ease",
+  },
+  logoutButton: {
+    width: "90%",
+    padding: "12px 20px",
+    margin: "12px 0",
+    backgroundColor: "#dc3545", // Red color for logout
     color: "white",
     border: "none",
     borderRadius: "8px",
