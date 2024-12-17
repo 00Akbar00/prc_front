@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Function to get roles
 export const getRoles = async () => {
-  const response = await axios.get("http://localhost:8082/Roles");
+  const response = await axios.get("http://localhost:8082/roles");
   return response;
 };
 

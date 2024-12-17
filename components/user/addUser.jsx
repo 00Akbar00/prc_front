@@ -25,6 +25,7 @@ const AddUser = ({ styles }) => {
         setDepartments(departmentsResponse?.data?.departments || []);
 
         const rolesResponse = await getRoles();
+        console.log(rolesResponse);
         setRoles(rolesResponse?.data?.roles || []);
         setLoading(false);
       } catch (error) {

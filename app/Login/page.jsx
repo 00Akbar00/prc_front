@@ -20,75 +20,84 @@ const LoginPage = () => {
       const response = await axios.post(
         "http://localhost:8082/login",
         values,
-        { withCredentials: false }
+        { withCredentials: true }
       );
-  
+      console.log(response.data);
       const data = response.data;
-      console.log(data);
   
       if (data.success) {
         // Set cookies with an expiration time (1 week)
         const expiresIn = new Date();
         expiresIn.setTime(expiresIn.getTime() + 60 * 60 * 24 * 7 * 1000); // 1 week from now
   
-        // Set the cookies with the correct expiration date
+        // Extract role name from nested data structure
+        const roleName = data.role;
+  
+        // Set cookies for user and role
         setCookie(null, 'user', JSON.stringify(data.user), {
-          path: '/', 
-          expires: expiresIn, // Set expiration date for the cookie
-          secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+          path: '/',
+          expires: expiresIn,
+          secure: process.env.NODE_ENV === 'production',
           httpOnly: false, // Allows JavaScript access to the cookie
-          sameSite: 'Lax', // SameSite policy for cross-site requests
-        });
-        setCookie(null, 'role', data.role, {
-          path: '/', 
-          expires: expiresIn, // Set expiration date for the cookie
-          secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-          httpOnly: false, // Allows JavaScript access to the cookie
-          sameSite: 'Lax', // SameSite policy for cross-site requests
+          sameSite: 'Lax',
         });
   
-        // Store user data in localStorage or context
-        localStorage.setItem('user', JSON.stringify(data.user)); // Store user info
-        localStorage.setItem('role', data.role); // Store role info
+        setCookie(null, 'role', roleName, {
+          path: '/',
+          expires: expiresIn,
+          secure: process.env.NODE_ENV === 'production',
+          httpOnly: false,
+          sameSite: 'Lax',
+        });
   
+        // Store user and role in localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('role', roleName);
+  
+        // Success toast
         console.log("Success toast triggered");
         toast.success("Login successful!", {
-          position: "top-right", 
+          position: "top-right",
           autoClose: 3000,
           hideProgressBar: true,
           theme: "colored",
         });
   
-        // Navigate based on the dashboard type only after successful login
-        if (data.role === "Admin") {
+        // Navigate based on the role
+        if (roleName === "Admin") {
+          
           router.push("/adminDash"); // Redirect to admin dashboard
-        } else if (data.role === "User") {
-          router.push("/userDash"); // Redirect to user dashboard
+        } else {
+          router.push("/userDash"); 
         }
+        console.log(roleName)
       } else {
+        // Error toast for failed login
         console.log("Error toast triggered");
         toast.error(data.message || "Login failed. Please try again.", {
-          position: "top-right", 
+          position: "top-right",
           autoClose: 3000,
           hideProgressBar: true,
           theme: "colored",
         });
       }
     } catch (error) {
+      // Handle unexpected errors
       toast.error(
         error.response?.data?.message ||
           "An unexpected error occurred. Please try again.",
         {
-          position: "top-right", 
+          position: "top-right",
           autoClose: 3000,
           hideProgressBar: true,
-          theme: "colored", 
+          theme: "colored",
         }
       );
     } finally {
       setLoading(false);
     }
   };
+  
   
   
   
