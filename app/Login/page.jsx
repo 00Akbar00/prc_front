@@ -60,9 +60,9 @@ const LoginPage = () => {
         });
   
         // Navigate based on the dashboard type only after successful login
-        if (data.role === "admin") {
+        if (data.role === "Admin") {
           router.push("/adminDash"); // Redirect to admin dashboard
-        } else if (data.role === "user") {
+        } else if (data.role === "User") {
           router.push("/userDash"); // Redirect to user dashboard
         }
       } else {

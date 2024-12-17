@@ -12,8 +12,8 @@ export function middleware(req) {
   if (!user || !user.id) {
     // Clear cookies if the user is not logged in
     const response = NextResponse.redirect(new URL('/', req.url));
-    //response.cookies.set('user', '', { path: '/', maxAge: -1 }); // Expire user cookie
-   // response.cookies.set('role', '', { path: '/', maxAge: -1 }); // Expire role cookie
+    response.cookies.set('user', '', { path: '/', maxAge: -1 }); // Expire user cookie
+   response.cookies.set('role', '', { path: '/', maxAge: -1 }); // Expire role cookie
     return response;
   }
 

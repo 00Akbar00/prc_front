@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SideBar from '../../components/sideBar/sideBar';
 import {styles} from '../../styles/styles'
+import LogoutButton from '../../components/logoutButton'
 
 // Importing your form components
 import AddUserForm from '../../components/user/addUser';
@@ -182,6 +183,9 @@ export default function AdminDash() {
           ))}
         </div>
         <div style={styles.contentArea}>{renderContent()}</div>
+        
+        {/* Logout Button */}
+        <LogoutButton label="Logout" style={{ marginTop: '20px' }} className="logout-button" />
       </div>
       <ToastContainer />
     </div>
