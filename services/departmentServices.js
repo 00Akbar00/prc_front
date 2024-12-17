@@ -1,8 +1,9 @@
 import axios from "axios";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Function to get departments
 export const getDepartments = async () => {
-  const response = await axios.get("http://localhost:8082/departments");
+  const response = await axios.get(`${API_BASE_URL}/departments`);
   return response;
 };
 
@@ -10,7 +11,7 @@ export const getDepartments = async () => {
 export const addDepartment = async (payload) => {
   try {
     const response = await axios.post(
-      "http://localhost:8082/addDepartment",
+      `${API_BASE_URL}/addDepartment`,
       payload // Send { name: "AnyDepartment" }
     );
     return { success: true, data: response.data };
@@ -23,7 +24,7 @@ export const addDepartment = async (payload) => {
 
 export const deleteDepartment = async (id) => {
   try {
-    const response = await axios.delete(`http://localhost:8082/deleteDepartment/${id}`);
+    const response = await axios.delete(`${API_BASE_URL}/deleteDepartment/${id}`);
     return response.data;  // Returning the response data
   } catch (error) {
     console.error('Error in deleting department:', error);

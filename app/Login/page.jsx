@@ -8,6 +8,8 @@ import styles from "../styles.module.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { setCookie } from 'nookies'; 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ const LoginPage = () => {
   
     try {
       const response = await axios.post(
-        "http://localhost:8082/login",
+        `${API_BASE_URL}/login`,
         values,
         { withCredentials: true }
       );
