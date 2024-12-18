@@ -11,6 +11,7 @@ import LogoutButton from '../../components/logoutButton'
 import AddUserForm from '../../components/user/addUser';
 import DeleteUserForm from '../../components/user/deleteUser';
 import ShowUserList from '../../components/user/showUser';
+import UpdateUser from '../../components/user/updateUser'
 
 import AddDepartmentForm from '../../components/department/addDepartment';
 import DeleteDepartmentForm from '../../components/department/deleteDepartment';
@@ -103,6 +104,13 @@ export default function AdminDash() {
             handleFormSubmit={handleFormSubmit}
             styles={styles} 
           />;
+          case 'Update':
+          return <UpdateUser 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleFormSubmit={handleFormSubmit}
+            styles={styles} 
+          />;
         default:
           return null;
       }
@@ -168,20 +176,33 @@ export default function AdminDash() {
     <div style={styles.container}>
       <SideBar onSectionChange={handleSectionChange} />
       <div style={styles.mainContent}>
-        <div style={styles.actionButtons}>
-          {['Add', 'Delete', 'Show'].map((action) => (
-            <button
-              key={action}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: currentAction === action ? '#0056b3' : '#007bff',
-              }}
-              onClick={() => handleActionChange(action)}
-            >
-              {`${action} ${currentSection}`}
-            </button>
-          ))}
-        </div>
+      <div style={styles.actionButtons}>
+  {['Add', 'Delete', 'Show'].map((action) => (
+    <button
+      key={action}
+      style={{
+        ...styles.actionButton,
+        backgroundColor: currentAction === action ? '#0056b3' : '#007bff',
+      }}
+      onClick={() => handleActionChange(action)}
+    >
+      {`${action} ${currentSection}`}
+    </button>
+  ))}
+  
+  {/* Show the Update button only for the User section */}
+  {currentSection === 'User' && (
+    <button
+      style={{
+        ...styles.actionButton,
+        backgroundColor: currentAction === 'Update' ? '#0056b3' : '#007bff',
+      }}
+      onClick={() => handleActionChange('Update')}
+    >
+      Update User
+    </button>
+  )}
+</div>
         <div style={styles.contentArea}>{renderContent()}</div>
         
         {/* Logout Button */}
