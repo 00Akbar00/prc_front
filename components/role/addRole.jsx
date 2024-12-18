@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { addRole } from '../../services/roleServices'; // your API service to add role
-import { styles } from '../../styles/styles';
+import * as Yup from 'yup'; // Yup for validation
 
 const AddRole = ({ styles }) => {
   // Initialize form state
   const [formData, setFormData] = useState({
     roleName: '', // Store the role name
+  });
+  const [errors, setErrors] = useState({}); // State to store validation errors
+
+  // Yup validation schema
+  const validationSchema = Yup.object({
+    roleName: Yup.string()
+      .trim()
+      .matches(/^[a-zA-Z\s]*$/, 'Role name must only contain letters') // Restrict to letters and spaces
+      .required('Role name is required'),
   });
 
   // Handle input changes dynamically
@@ -13,7 +22,7 @@ const AddRole = ({ styles }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value, // Update the roleName dynamically
+      [name]: value, // Update roleName dynamically
     });
   };
 
@@ -21,25 +30,35 @@ const AddRole = ({ styles }) => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    const name = formData.roleName;
-
-    if (!name) {
-      alert('Please enter a role name');
-      return;
-    }
-
     try {
-      // Send { name: "AnyRole" } in the payload
-      const response = await addRole({ name });
+      // Clear previous errors
+      setErrors({});
 
-      if (response.status == 201) {
+      // Validate the formData using Yup
+      await validationSchema.validate(formData, { abortEarly: false });
+
+      // Send { name: "AnyRole" } in the payload
+      const response = await addRole({ name: formData.roleName });
+
+      if (response.status === 201) {
         alert('Role added successfully');
+        // Reset form
+        setFormData({ roleName: '' });
       } else {
         alert('Failed to add role: ' + response.message);
       }
     } catch (error) {
-      alert('An error occurred while adding the role');
-      console.error(error);
+      if (error.name === 'ValidationError') {
+        // Extract and set validation errors
+        const validationErrors = error.inner.reduce((acc, currentError) => {
+          acc[currentError.path] = currentError.message;
+          return acc;
+        }, {});
+        setErrors(validationErrors); // Update errors state
+      } else {
+        console.error('An unexpected error occurred:', error);
+        alert('An unexpected error occurred. Please try again.');
+      }
     }
   };
 
@@ -54,9 +73,10 @@ const AddRole = ({ styles }) => {
           name="roleName"
           value={formData.roleName || ''} // Ensure formData is initialized
           onChange={handleInputChange}
-          required
           style={styles.input}
         />
+        {/* Show error message for roleName */}
+        {errors.roleName && <div style={{ color: 'red' }}>{errors.roleName}</div>}
       </div>
       <button type="submit" style={styles.submitButton}>
         Add Role
