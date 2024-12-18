@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { addDepartment } from '../../services/departmentServices'; // your API service
+import * as Yup from 'yup'; // Yup for validation
 import { styles } from '../../styles/styles';
 
 const AddDepartment = ({ styles }) => {
   // Initialize form state
   const [formData, setFormData] = useState({
     departmentName: '', // Store the department name
+  });
+  const [errors, setErrors] = useState({}); // State to store validation errors
+
+  // Yup validation schema
+  const validationSchema = Yup.object({
+    departmentName: Yup.string()
+      .trim()
+      .matches(/^[a-zA-Z\s]*$/, 'Department name must only contain letters')
+      .required('Department name is required'),
   });
 
   // Handle input changes dynamically
@@ -17,35 +27,43 @@ const AddDepartment = ({ styles }) => {
     });
   };
 
- // Function to handle the form submission
- const handleFormSubmit = async (e) => {
-  e.preventDefault(); 
+  // Function to handle the form submission
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
 
-  const name = formData.departmentName; 
+    try {
+      // Clear previous errors
+      setErrors({});
 
-  console.log(name); 
+      // Validate the formData using Yup
+      await validationSchema.validate(formData, { abortEarly: false });
 
-  if (!name) {
-    alert('Please enter a department name');
-    return;
-  }
+      const name = formData.departmentName;
 
-  try {
-    // Send { name: "AnyDepartment" } in the payload
-    const response = await addDepartment({ name });
+      console.log(name);
 
-    if (response.success) {
-      alert('Department added successfully');
-    } else {
-      alert('Failed to add department: ' + response.message);
+      // Send { name: "AnyDepartment" } in the payload
+      const response = await addDepartment({ name });
+
+      if (response.success) {
+        alert('Department added successfully');
+      } else {
+        alert('Failed to add department: ' + response.message);
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        // Extract and set validation errors
+        const validationErrors = error.inner.reduce((acc, currentError) => {
+          acc[currentError.path] = currentError.message;
+          return acc;
+        }, {});
+        setErrors(validationErrors); // Update errors state
+      } else {
+        console.error('An unexpected error occurred:', error);
+        alert('An unexpected error occurred. Please try again.');
+      }
     }
-  } catch (error) {
-    alert('An error occurred while adding the department');
-    console.error(error);
-  }
-};
-  
-  
+  };
 
   return (
     <form style={styles.form} onSubmit={handleFormSubmit}>
@@ -58,9 +76,10 @@ const AddDepartment = ({ styles }) => {
           name="departmentName"
           value={formData.departmentName || ''} // Ensure formData is initialized
           onChange={handleInputChange}
-          required
           style={styles.input}
         />
+        {/* Show error message for departmentName */}
+        {errors.departmentName && <div style={{ color: 'red' }}>{errors.departmentName}</div>}
       </div>
       <button type="submit" style={styles.submitButton}>
         Add Department
