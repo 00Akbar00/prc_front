@@ -129,10 +129,6 @@ export const styles = {
     tableRowHover: {
       backgroundColor: "#f1f1f1", // Adds hover effect
     },
-    form: {
-      width: '80%',
-      margin: '0 auto',
-    },
     formGroup: {
       marginBottom: '15px',
     },
@@ -270,32 +266,6 @@ export const styles = {
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
-    },
-    dropdown: {
-      position: "absolute",
-      top: "350px",
-      left: "20px",
-      backgroundColor: "#fff",
-      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-      borderRadius: "5px",
-      width: "200px",
-      maxHeight: "200px",
-      overflowY: "auto",
-      zIndex: "1000",
-    },
-    dropdownSearch: {
-      padding: "8px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      width: "100%",
-    },
-    dropdownItem: {
-      padding: "10px",
-      borderBottom: "1px solid #eee",
-      cursor: "pointer",
-    },
-    dropdownItemHover: {
-      backgroundColor: "#f0f0f0",
-    },
+    }
     
   };

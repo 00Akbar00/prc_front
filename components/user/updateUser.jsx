@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Select from "react-select"; // Import react-select
 import { getUsers, updateUser } from "../../services/userServices";
 import { getDepartments } from "../../services/departmentServices";
 import { getRoles } from "../../services/roleServices";
@@ -17,8 +18,18 @@ const UpdateUsers = ({ styles }) => {
         const rolesResponse = await getRoles();
 
         setUsers(usersResponse?.data?.users || []);
-        setDepartments(departmentsResponse?.data?.departments || []);
-        setRoles(rolesResponse?.data?.roles || []);
+        setDepartments(
+          departmentsResponse?.data?.departments?.map((dept) => ({
+            value: dept.id,
+            label: dept.name,
+          })) || []
+        );
+        setRoles(
+          rolesResponse?.data?.roles?.map((role) => ({
+            value: role.id,
+            label: role.name,
+          })) || []
+        );
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -29,33 +40,21 @@ const UpdateUsers = ({ styles }) => {
     fetchData();
   }, []);
 
-  // Handle update of a user
   const handleUpdate = async (userId) => {
     const updatedUser = users.find((user) => user.id === userId);
     try {
-      await updateUser(userId, updatedUser); // Call your API to update the user
+      await updateUser(userId, updatedUser);
       alert("User updated successfully!");
     } catch (error) {
       alert(`Error updating user: ${error.message}`);
     }
   };
 
-  // Handle change in editable fields
-  const handleInputChange = (e, userId, field) => {
-    const { value } = e.target;
+  const handleMultiSelectChange = (userId, field, selectedOptions) => {
+    const selectedIds = selectedOptions.map((option) => option.value);
     setUsers((prevUsers) =>
       prevUsers.map((user) =>
-        user.id === userId ? { ...user, [field]: value } : user
-      )
-    );
-  };
-
-  // Handle department and role selection
-  const handleSelectChange = (e, userId, field) => {
-    const { value } = e.target;
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId ? { ...user, [field]: value } : user
+        user.id === userId ? { ...user, [field]: selectedIds } : user
       )
     );
   };
@@ -72,8 +71,8 @@ const UpdateUsers = ({ styles }) => {
           <tr>
             <th style={styles.tableHeader}>Name</th>
             <th style={styles.tableHeader}>Email</th>
-            <th style={styles.tableHeader}>Department</th>
-            <th style={styles.tableHeader}>Role</th>
+            <th style={styles.tableHeader}>Departments</th>
+            <th style={styles.tableHeader}>Roles</th>
             <th style={styles.tableHeader}>Actions</th>
           </tr>
         </thead>
@@ -85,50 +84,49 @@ const UpdateUsers = ({ styles }) => {
                 <input
                   type="text"
                   value={user.name}
-                  onChange={(e) => handleInputChange(e, user.id, "name")}
+                  onChange={(e) =>
+                    setUsers((prevUsers) =>
+                      prevUsers.map((u) =>
+                        u.id === user.id
+                          ? { ...u, name: e.target.value }
+                          : u
+                      )
+                    )
+                  }
                   style={styles.inputField}
                 />
               </td>
-
               {/* Email (non-editable) */}
+              <td style={styles.tableCell}>{user.email}</td>
+
+              {/* Multi-select Departments */}
               <td style={styles.tableCell}>
-                <input
-                type="email"
-                value={user.email}
-                onChange={(e) => handleInputChange(e, user.id, "email")}
-                style={styles.inputField}
+                <Select
+                  isMulti
+                  value={departments.filter((dept) =>
+                    user.departments?.includes(dept.value)
+                  )}
+                  options={departments}
+                  onChange={(selectedOptions) =>
+                    handleMultiSelectChange(user.id, "departments", selectedOptions)
+                  }
+                  styles={styles.selectField}
                 />
-             </td>
-              {/* Department Dropdown */}
-              <td style={styles.tableCell}>
-                <select
-                  value={user.departmentId || ""}
-                  onChange={(e) => handleSelectChange(e, user.id, "departmentId")}
-                  style={styles.selectField}
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
               </td>
 
-              {/* Role Dropdown */}
+              {/* Multi-select Roles */}
               <td style={styles.tableCell}>
-                <select
-                  value={user.roleId || ""}
-                  onChange={(e) => handleSelectChange(e, user.id, "roleId")}
-                  style={styles.selectField}
-                >
-                  <option value="">Select Role</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  isMulti
+                  value={roles.filter((role) =>
+                    user.roles?.includes(role.value)
+                  )}
+                  options={roles}
+                  onChange={(selectedOptions) =>
+                    handleMultiSelectChange(user.id, "roles", selectedOptions)
+                  }
+                  styles={styles.selectField}
+                />
               </td>
 
               {/* Update Button */}
