@@ -45,7 +45,7 @@ const UserListWithDelete = () => {
     return <div>Loading users...</div>;
   }
 
-  // Render the user list with a delete button for each user
+  // Render the user list, excluding rows where the user's role is "Admin"
   return (
     <div style={styles.tableContainer}>
       <h2>Users</h2>
@@ -59,21 +59,26 @@ const UserListWithDelete = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td style={styles.tableCell}>{user.id}</td>
-              <td style={styles.tableCell}>{user.name}</td>
-              <td style={styles.tableCell}>{user.email}</td>
-              <td style={styles.tableCell}>
-                <button
-                  style={styles.deleteButton}
-                  onClick={() => handleDelete(user.id)} // Call handleDelete with user ID
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {users
+            // Filter out users with the "Admin" role
+            .filter((user) =>
+              user.roles && !user.roles.some((role) => role.name === 'Admin')
+            )
+            .map((user) => (
+              <tr key={user.id}>
+                <td style={styles.tableCell}>{user.id}</td>
+                <td style={styles.tableCell}>{user.name}</td>
+                <td style={styles.tableCell}>{user.email}</td>
+                <td style={styles.tableCell}>
+                  <button
+                    style={styles.deleteButton}
+                    onClick={() => handleDelete(user.id)} // Call handleDelete with user ID
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

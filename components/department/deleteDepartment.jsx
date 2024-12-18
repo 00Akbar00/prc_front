@@ -60,16 +60,14 @@ const DepartmentListWithDelete = () => {
         </thead>
         <tbody>
           {departments.map((department) => (
-            <tr key={department.id}> {/* Use department.id as the key */}
-              <td>{department.id}</td> {/* Display department ID */}
-              <td>{department.name}</td> {/* Display department name */}
+            <tr key={department.id}>
+              <td>{department.id}</td>
+              <td>{department.name}</td>
               <td>
                 <button
                   style={styles.deleteButton} // Use a red button style
                   onClick={() => handleDelete(department.id)} // Call handleDelete with department ID
-                >
-                  Delete
-                </button>
+                >Delete</button>
               </td>
             </tr>
           ))}
@@ -77,6 +75,7 @@ const DepartmentListWithDelete = () => {
       </table>
     </div>
   );
+  
 };
 
 export default DepartmentListWithDelete;

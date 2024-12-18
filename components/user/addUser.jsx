@@ -91,6 +91,14 @@ const AddUser = ({ styles }) => {
 
   // Handle form submission
   const handleFormSubmit = async (e) => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      departments: [],
+      roles: [],
+    });
+    
     e.preventDefault();
 
     // Prepare the payload with the correct field names

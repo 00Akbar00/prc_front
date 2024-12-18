@@ -37,9 +37,9 @@ const ShowDepartmentList = ({ styles }) => {
         </thead>
         <tbody>
           {departments.map((department) => (
-            <tr key={department.id}> {/* Use department.id as the key */}
-              <td>{department.id}</td> {/* Display department ID */}
-              <td>{department.name}</td> {/* Display department name */}
+            <tr key={department.id}>{/* Use department.id as the key */}
+              <td>{department.id}</td>{/* Display department ID */}
+              <td>{department.name}</td>{/* Display department name */}
             </tr>
           ))}
         </tbody>

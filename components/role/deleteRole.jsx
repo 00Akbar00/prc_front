@@ -60,7 +60,7 @@ const RoleListWithDelete = () => {
         </thead>
         <tbody>
           {roles.map((role) => (
-            <tr key={role.id}> {/* Use role.id as the key */}
+            <tr key={role.id}>{/* Use role.id as the key */}
               <td style={styles.tableCell}>{role.id}</td>
               <td style={styles.tableCell}>{role.name}</td>
               <td style={styles.tableCell}>
