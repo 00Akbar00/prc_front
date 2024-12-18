@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createUser } from '../../services/userServices';
 import { getRoles } from '../../services/roleServices';
 import { getDepartments } from '../../services/departmentServices';
+import * as Yup from 'yup';
 
 const AddUser = ({ styles }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const AddUser = ({ styles }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false); // Toggle for dropdown visibility
   const [selectedOptionType, setSelectedOptionType] = useState(''); // Track whether user is selecting departments or roles
   const [searchQuery, setSearchQuery] = useState(''); // For filtering dropdown options
+  const [errors, setErrors] = useState({}); // State to store error messages
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,6 +93,15 @@ const AddUser = ({ styles }) => {
 
   // Handle form submission
   const handleFormSubmit = async (e) => {
+
+    const validationSchema = Yup.object({
+      name: Yup.string().trim().required('Name is required'),
+      email: Yup.string().email('Invalid email address').required('Email is required'),
+      password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+      roles: Yup.array().min(1, 'At least one role is required').required('Roles are required'),
+      departments: Yup.array().min(1, 'At least one department is required').required('Departments are required'),
+    });
+
     setFormData({
       name: '',
       email: '',
@@ -104,16 +115,31 @@ const AddUser = ({ styles }) => {
     // Prepare the payload with the correct field names
     const payload = {
       ...formData,
-      roleIds: formData.roles, // Rename 'roles' to 'roleIds'
-      departmentIds: formData.departments, // Rename 'departments' to 'departmentIds'
+      roleIds: formData.roles, 
+      departmentIds: formData.departments, 
     };
 
     try {
+
+      setErrors({});
+
+      await validationSchema.validate(payload, { abortEarly: false });
+
       const response = await createUser(payload); // Pass the modified payload
       alert('User created successfully!');
+      
     } catch (error) {
-      console.error('Error creating user:', error);
-      alert('Error creating user');
+      if (error.name === 'ValidationSchema') {
+        // Map errors to the form fields
+        const validationErrors = error.inner.reduce((acc, currentError) => {
+          acc[currentError.path] = currentError.message;
+          return acc;
+        }, {});
+        setErrors(validationErrors); // Set validation errors to state
+      } else {
+        console.error('Error:', error);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
