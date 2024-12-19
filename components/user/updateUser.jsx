@@ -3,12 +3,15 @@ import Select from "react-select"; // Import react-select
 import { getUsers, updateUser } from "../../services/userServices";
 import { getDepartments } from "../../services/departmentServices";
 import { getRoles } from "../../services/roleServices";
+import * as Yup from "yup";
 
 const UpdateUsers = ({ styles }) => {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [formValues, setFormValues] = useState({});
+  const [errors, setErrors] = useState({}); // Store validation errors
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,6 +19,16 @@ const UpdateUsers = ({ styles }) => {
         const usersResponse = await getUsers();
         const departmentsResponse = await getDepartments();
         const rolesResponse = await getRoles();
+
+        const initialFormValues = {};
+        usersResponse?.data?.users?.forEach((user) => {
+          initialFormValues[user.id] = {
+            name: user.name,
+            email: user.email,
+            departments: user.departments || [],
+            roles: user.roles || [],
+          };
+        });
 
         setUsers(usersResponse?.data?.users || []);
         setDepartments(
@@ -30,6 +43,7 @@ const UpdateUsers = ({ styles }) => {
             label: role.name,
           })) || []
         );
+        setFormValues(initialFormValues);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -40,16 +54,46 @@ const UpdateUsers = ({ styles }) => {
     fetchData();
   }, []);
 
-  const handleUpdate = async (userId) => {
-    const updatedUser = users.find((user) => user.id === userId);
+  // Yup schema for validation
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .required("Name is required")
+      .matches(/^[A-Za-z\s]+$/, "Name must not contain numbers or special characters"),
+    departments: Yup.array()
+      .of(Yup.number().positive("Invalid department ID"))
+      .min(1, "At least one department must be selected"),
+    roles: Yup.array()
+      .of(Yup.number().positive("Invalid role ID"))
+      .min(1, "At least one role must be selected"),
+  });
+
+  const validateFields = async (userId) => {
     try {
-      // Send the updated user details to the backend
+      await validationSchema.validate(formValues[userId], { abortEarly: false });
+      setErrors((prev) => ({ ...prev, [userId]: {} })); // Clear errors if validation passes
+      return true;
+    } catch (validationErrors) {
+      const formattedErrors = {};
+      validationErrors.inner.forEach((error) => {
+        formattedErrors[error.path] = error.message;
+      });
+      setErrors((prev) => ({ ...prev, [userId]: formattedErrors }));
+      return false;
+    }
+  };
+
+  const handleUpdate = async (userId) => {
+    const isValid = await validateFields(userId);
+    if (!isValid) return;
+
+    try {
+      const user = formValues[userId];
       await updateUser(userId, {
         id: userId,
-        name: updatedUser.name,
-        email: updatedUser.email, // Include email if required
-        departmentIds: updatedUser.departments, // Pass department IDs
-        roleIds: updatedUser.roles, // Pass role IDs
+        name: user.name,
+        email: user.email, // Email remains non-editable
+        departmentIds: user.departments, // Pass department IDs
+        roleIds: user.roles, // Pass role IDs
       });
       alert("User updated successfully!");
     } catch (error) {
@@ -57,13 +101,14 @@ const UpdateUsers = ({ styles }) => {
     }
   };
 
-  const handleMultiSelectChange = (userId, field, selectedOptions) => {
-    const selectedIds = selectedOptions.map((option) => option.value);
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId ? { ...user, [field]: selectedIds } : user
-      )
-    );
+  const handleChange = (userId, field, value) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [userId]: {
+        ...prev[userId],
+        [field]: value,
+      },
+    }));
   };
 
   if (loading) {
@@ -90,19 +135,16 @@ const UpdateUsers = ({ styles }) => {
               <td style={styles.tableCell}>
                 <input
                   type="text"
-                  value={user.name}
-                  onChange={(e) =>
-                    setUsers((prevUsers) =>
-                      prevUsers.map((u) =>
-                        u.id === user.id
-                          ? { ...u, name: e.target.value }
-                          : u
-                      )
-                    )
-                  }
+                  name="name"
+                  value={formValues[user.id]?.name || ""}
+                  onChange={(e) => handleChange(user.id, "name", e.target.value)}
                   style={styles.inputField}
                 />
+                {errors[user.id]?.name && (
+                  <div style={styles.errorText}>{errors[user.id].name}</div>
+                )}
               </td>
+
               {/* Email (non-editable) */}
               <td style={styles.tableCell}>{user.email}</td>
 
@@ -110,36 +152,53 @@ const UpdateUsers = ({ styles }) => {
               <td style={styles.tableCell}>
                 <Select
                   isMulti
+                  name="departments"
                   value={departments.filter((dept) =>
-                    user.departments?.includes(dept.value)
+                    formValues[user.id]?.departments.includes(dept.value)
                   )}
                   options={departments}
                   onChange={(selectedOptions) =>
-                    handleMultiSelectChange(user.id, "departments", selectedOptions)
+                    handleChange(
+                      user.id,
+                      "departments",
+                      selectedOptions.map((option) => option.value)
+                    )
                   }
                   styles={styles.selectField}
                 />
+                {errors[user.id]?.departments && (
+                  <div style={styles.errorText}>{errors[user.id].departments}</div>
+                )}
               </td>
 
               {/* Multi-select Roles */}
               <td style={styles.tableCell}>
                 <Select
                   isMulti
+                  name="roles"
                   value={roles.filter((role) =>
-                    user.roles?.includes(role.value)
+                    formValues[user.id]?.roles.includes(role.value)
                   )}
                   options={roles}
                   onChange={(selectedOptions) =>
-                    handleMultiSelectChange(user.id, "roles", selectedOptions)
+                    handleChange(
+                      user.id,
+                      "roles",
+                      selectedOptions.map((option) => option.value)
+                    )
                   }
                   styles={styles.selectField}
                 />
+                {errors[user.id]?.roles && (
+                  <div style={styles.errorText}>{errors[user.id].roles}</div>
+                )}
               </td>
 
               {/* Update Button */}
               <td style={styles.tableCell}>
                 <button
                   onClick={() => handleUpdate(user.id)}
+                  type="button"
                   style={styles.updateButton}
                 >
                   Update
