@@ -43,7 +43,14 @@ const UpdateUsers = ({ styles }) => {
   const handleUpdate = async (userId) => {
     const updatedUser = users.find((user) => user.id === userId);
     try {
-      await updateUser(userId, updatedUser);
+      // Send the updated user details to the backend
+      await updateUser(userId, {
+        id: userId,
+        name: updatedUser.name,
+        email: updatedUser.email, // Include email if required
+        departmentIds: updatedUser.departments, // Pass department IDs
+        roleIds: updatedUser.roles, // Pass role IDs
+      });
       alert("User updated successfully!");
     } catch (error) {
       alert(`Error updating user: ${error.message}`);

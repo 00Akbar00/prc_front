@@ -31,3 +31,14 @@ export const deleteUser = async (id) => {
     throw error;
   }
 };
+
+// Function to update a user
+export const updateUser = async (id, payload) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/updateUser/${id}`, payload);
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || error.message };
+  }
+};
+
