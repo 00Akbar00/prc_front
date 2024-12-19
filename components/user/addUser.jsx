@@ -18,6 +18,7 @@ const AddUser = ({ styles }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false); // Toggle for dropdown visibility
   const [selectedOptionType, setSelectedOptionType] = useState(''); // Track whether user is selecting departments or roles
   const [searchQuery, setSearchQuery] = useState(''); // For filtering dropdown options
+  const [permissions, setPermissions] = useState([]);
   const [errors, setErrors] = useState({}); // State to store error messages
 
   useEffect(() => {
@@ -29,6 +30,7 @@ const AddUser = ({ styles }) => {
         const rolesResponse = await getRoles();
         console.log(rolesResponse);
         setRoles(rolesResponse?.data?.roles || []);
+        setPermissions(rolesResponse.data.roles.permissions || []);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -66,10 +68,22 @@ const AddUser = ({ styles }) => {
         ...prevData,
         roles: [...prevData.roles, item.id],
       }));
+  
+      // Fetch permissions for the selected role
+      const selectedRole = roles.find(role => role.id === item.id);
+      if (selectedRole) {
+        setPermissions(prevPermissions => [
+          ...prevPermissions,
+          ...selectedRole.permissions,
+        ]);
+      }
     }
     setSearchQuery(''); // Reset search query after selecting
     setDropdownVisible(false); // Hide dropdown
   };
+
+  
+  
 
   // Handle removing a selected item
   const removeSelectedItem = (name, value) => {
@@ -77,7 +91,18 @@ const AddUser = ({ styles }) => {
       ...prevData,
       [name]: prevData[name].filter(item => item !== value),
     }));
+  
+    if (name === 'roles') {
+      // Remove the permissions associated with the removed role
+      const role = roles.find(r => r.id === value);
+      if (role) {
+        setPermissions(prevPermissions => 
+          prevPermissions.filter(permission => !role.permissions.includes(permission))
+        );
+      }
+    }
   };
+  
 
   // Filter departments or roles based on search query
   const filterOptions = (options) => {
@@ -148,158 +173,187 @@ const AddUser = ({ styles }) => {
   }
 
   return (
-    <form style={styles.form} onSubmit={handleFormSubmit}>
-      <h2>Add User</h2>
-      
-      {/* Name Input */}
-      <div style={styles.formGroup}>
-        <label htmlFor="name">Name:</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          required
-          style={styles.input}
-        />
-      </div>
-
-      {/* Email Input */}
-      <div style={styles.formGroup}>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          required
-          style={styles.input}
-        />
-      </div>
-
-      {/* Password Input */}
-      <div style={styles.formGroup}>
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleInputChange}
-          required
-          style={styles.input}
-        />
-      </div>
-
-      {/* Departments Field */}
-      <div style={styles.formGroup}>
-        <label htmlFor="departments">Departments:</label>
-        <div
-          style={styles.selectInput}
-          onClick={() => handleInputClick('departments')}
-        >
-          {formData.departments.map(id => {
-            const department = departments.find(d => d.id === id);
-            return (
-              department && (
-                <span key={id} style={styles.tag}>
+    <div style={styles.container}>
+      <form style={styles.form} onSubmit={handleFormSubmit}>
+        <h2>Add User</h2>
+        
+        {/* Name Input */}
+        <div style={styles.formGroup}>
+          <label htmlFor="name">Name:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            style={styles.input}
+          />
+        </div>
+  
+        {/* Email Input */}
+        <div style={styles.formGroup}>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            style={styles.input}
+          />
+        </div>
+  
+        {/* Password Input */}
+        <div style={styles.formGroup}>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            required
+            style={styles.input}
+          />
+        </div>
+  
+        {/* Departments Field */}
+        <div style={styles.formGroup}>
+          <label htmlFor="departments">Departments:</label>
+          <div
+            style={styles.selectInput}
+            onClick={() => handleInputClick('departments')}
+          >
+            {formData.departments.map(id => {
+              const department = departments.find(d => d.id === id);
+              return (
+                department && (
+                  <span key={id} style={styles.tag}>
+                    {department.name}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent input field click
+                        removeSelectedItem('departments', id); // Remove selected department
+                      }}
+                      style={styles.removeTagButton}
+                    >
+                      x
+                    </button>
+                  </span>
+                )
+              );
+            })}
+            {formData.departments.length === 0 && <span>Select Departments</span>}
+          </div>
+  
+          {dropdownVisible && selectedOptionType === 'departments' && (
+            <div style={styles.dropdown}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search departments"
+                style={styles.dropdownSearch}
+              />
+              {filterOptions(departments).map(department => (
+                <div
+                  key={department.id}
+                  style={styles.dropdownItem}
+                  onClick={() => handleSelectItem(department)}
+                >
                   {department.name}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent input field click
-                      removeSelectedItem('departments', id); // Remove selected department
-                    }}
-                    style={styles.removeTagButton}
-                  >
-                    x
-                  </button>
-                </span>
-              )
-            );
-          })}
-          {formData.departments.length === 0 && <span>Select Departments</span>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-
-        {dropdownVisible && selectedOptionType === 'departments' && (
-          <div style={styles.dropdown}>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search departments"
-              style={styles.dropdownSearch}
-            />
-            {filterOptions(departments).map(department => (
-              <div
-                key={department.id}
-                style={styles.dropdownItem}
-                onClick={() => handleSelectItem(department)}
-              >
-                {department.name}
-              </div>
-            ))}
+  
+        {/* Roles Field */}
+        <div style={styles.formGroup}>
+          <label htmlFor="roles">Roles:</label>
+          <div
+            style={styles.selectInput}
+            onClick={() => handleInputClick('roles')}
+          >
+            {formData.roles.map(id => {
+              const role = roles.find(r => r.id === id);
+              return (
+                role && (
+                  <span key={id} style={styles.tag}>
+                    {role.name}
+                    <button
+                      type="button"
+                      onClick={() => removeSelectedItem('roles', id)}
+                      style={styles.removeTagButton}
+                    >
+                      x
+                    </button>
+                  </span>
+                )
+              );
+            })}
+            {formData.roles.length === 0 && <span>Select Roles</span>}
           </div>
-        )}
-      </div>
-
-      {/* Roles Field */}
-      <div style={styles.formGroup}>
-        <label htmlFor="roles">Roles:</label>
-        <div
-          style={styles.selectInput}
-          onClick={() => handleInputClick('roles')}
-        >
-          {formData.roles.map(id => {
-            const role = roles.find(r => r.id === id);
-            return (
-              role && (
-                <span key={id} style={styles.tag}>
+  
+          {dropdownVisible && selectedOptionType === 'roles' && (
+            <div style={styles.dropdown}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search roles"
+                style={styles.dropdownSearch}
+              />
+              {filterOptions(roles).map(role => (
+                <div
+                  key={role.id}
+                  style={styles.dropdownItem}
+                  onClick={() => handleSelectItem(role)}
+                >
                   {role.name}
-                  <button
-                    type="button"
-                    onClick={() => removeSelectedItem('roles', id)}
-                    style={styles.removeTagButton}
-                  >
-                    x
-                  </button>
-                </span>
-              )
-            );
-          })}
-          {formData.roles.length === 0 && <span>Select Roles</span>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+  
+        {/* Submit Button */}
+        <button type="submit" style={styles.submitButton}>
+          Submit
+        </button>
+      </form>
+      
+      {/* Permissions Div */}
+    <div style={styles.permission}>
+      <h2 style={{fontWeight: 'bold'}}></h2>
+      <table style={styles.table}>
+        <thead>
+          <tr>
+            <th>Permissions associated to user</th>
+          </tr>
+        </thead>
+        <tbody>
+          {permissions.length === 0 ? (
+            <tr>
+              <td>No permissions available</td>
+            </tr>
+          ) : (
+            permissions.map((permission, index) => (
+              <tr key={index}>
+                <td>{permission.name}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
 
-        {dropdownVisible && selectedOptionType === 'roles' && (
-          <div style={styles.dropdown}>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search roles"
-              style={styles.dropdownSearch}
-            />
-            {filterOptions(roles).map(role => (
-              <div
-                key={role.id}
-                style={styles.dropdownItem}
-                onClick={() => handleSelectItem(role)}
-              >
-                {role.name}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Submit Button */}
-      <button type="submit" style={styles.submitButton}>
-        Submit
-      </button>
-    </form>
+    </div>
   );
+  
 };
 
 export default AddUser;

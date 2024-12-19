@@ -44,6 +44,7 @@ export const styles = {
       padding: '25px',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       color: '#333333',
+      width: '50%'
     },
     formGroup: {
       marginBottom: '20px',
@@ -266,6 +267,98 @@ export const styles = {
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
-    }
+    },
+    container: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: '20px', // Add space between form and permission div
+      width: '100%',
+    },
+    form: {
+      flex: 1,
+      maxWidth: '60%', // Control the width of the form
+      padding: '20px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+    },
+    permission: {
+      flex: 1,
+      maxWidth: '40%', // Control the width of the permission div
+      padding: '20px',
+      textAlign: 'center',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      backgroundColor: '#f9f9f9',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    formGroup: {
+      marginBottom: '15px',
+    },
+    input: {
+      width: '100%',
+      padding: '10px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+    },
+    selectInput: {
+      width: '100%',
+      padding: '10px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '5px',
+      alignItems: 'center',
+      cursor: 'pointer',
+    },
+    tag: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      backgroundColor: '#007bff',
+      color: '#fff',
+      borderRadius: '3px',
+      padding: '5px 10px',
+      marginRight: '5px',
+    },
+    removeTagButton: {
+      marginLeft: '5px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      color: '#fff',
+      cursor: 'pointer',
+    },
+    dropdown: {
+      marginTop: '5px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      maxHeight: '150px',
+      overflowY: 'auto',
+      backgroundColor: '#fff',
+    },
+    dropdownSearch: {
+      width: '100%',
+      padding: '10px',
+      border: '1px solid #ccc',
+      borderRadius: '5px',
+      marginBottom: '5px',
+    },
+    dropdownItem: {
+      padding: '10px',
+      cursor: 'pointer',
+      borderBottom: '1px solid #eee',
+    },
+    submitButton: {
+      width: '100%',
+      padding: '10px',
+      backgroundColor: '#28a745',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    },
+    
     
   };
