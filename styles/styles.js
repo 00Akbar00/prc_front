@@ -47,8 +47,9 @@ export const styles = {
       width: '50%'
     },
     formGroup: {
-      marginBottom: '20px',
-      color: '#333333',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px',
     },
     input: {
       width: '100%',
@@ -129,16 +130,6 @@ export const styles = {
     },
     tableRowHover: {
       backgroundColor: "#f1f1f1", // Adds hover effect
-    },
-    formGroup: {
-      marginBottom: '15px',
-    },
-    input: {
-      width: '100%',
-      padding: '8px',
-      margin: '5px 0',
-      border: '1px solid #ccc',
-      borderRadius: '4px',
     },
     selectInput: {
       width: '100%',
@@ -297,12 +288,7 @@ export const styles = {
     formGroup: {
       marginBottom: '15px',
     },
-    input: {
-      width: '100%',
-      padding: '10px',
-      border: '1px solid #ccc',
-      borderRadius: '5px',
-    },
+
     selectInput: {
       width: '100%',
       padding: '10px',
@@ -359,6 +345,13 @@ export const styles = {
       borderRadius: '5px',
       cursor: 'pointer',
     },
+    errorInput:{
+      color: "red",
+      fontSize: "14px",
+      marginTop: "5px",
+      fontWeight: "bold",
+      fontStyle: "italic",
+    }
     
     
   };

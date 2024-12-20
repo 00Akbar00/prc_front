@@ -3,14 +3,16 @@ import { createUser } from '../../services/userServices';
 import { getRoles } from '../../services/roleServices';
 import { getDepartments } from '../../services/departmentServices';
 import * as Yup from 'yup';
+import { useFormik } from "formik";
 
 const AddUser = ({ styles }) => {
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    departments: [], // Array for selected departments
-    roles: [], // Array for selected roles
+    departments: [], 
+    roles: [], 
   });
   const [departments, setDepartments] = useState([]); // Departments from backend
   const [roles, setRoles] = useState([]); // Roles from backend
@@ -117,16 +119,7 @@ const AddUser = ({ styles }) => {
   };
 
   // Handle form submission
-  const handleFormSubmit = async (e) => {
-
-    const validationSchema = Yup.object({
-      name: Yup.string().trim().required('Name is required'),
-      email: Yup.string().email('Invalid email address').required('Email is required'),
-      password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-      roles: Yup.array().min(1, 'At least one role is required').required('Roles are required'),
-      departments: Yup.array().min(1, 'At least one department is required').required('Departments are required'),
-    });
-
+  const handleFormSubmit = async (formValues) => {
     setFormData({
       name: '',
       email: '',
@@ -135,195 +128,262 @@ const AddUser = ({ styles }) => {
       roles: [],
     });
     
-    e.preventDefault();
+    setLoading(true);
 
-    // Prepare the payload with the correct field names
+    // Prepare the payload with correct field names
     const payload = {
-      ...formData,
-      roleIds: formData.roles, 
-      departmentIds: formData.departments, 
+      ...formValues,
+      roleIds: formValues.roles, // Map roles to roleIds
+      departmentIds: formValues.departments, // Map departments to departmentIds
     };
 
     try {
-
       setErrors({});
+      setPermissions([]); // Reset permissions if needed
 
-      await validationSchema.validate(payload, { abortEarly: false });
+      const response = await createUser(payload); // Use your createUser API function
 
-      const response = await createUser(payload); // Pass the modified payload
-      alert('User created successfully!');
-      
-    } catch (error) {
-      if (error.name === 'ValidationSchema') {
-        // Map errors to the form fields
-        const validationErrors = error.inner.reduce((acc, currentError) => {
-          acc[currentError.path] = currentError.message;
-          return acc;
-        }, {});
-        setErrors(validationErrors); // Set validation errors to state
-      } else {
-        console.error('Error:', error);
-        alert(`Error: ${error.message}`);
+      if (response.success) {
+        alert('User created successfully!');
+        formik.resetForm(); // Reset Formik values
       }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      setErrors(error.response?.data || { general: 'Something went wrong' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div>Loading departments and roles...</div>;
-  }
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      email: '',
+      password: '',
+      departments: [],
+      roles: [],
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required('Name is required'),
+      email: Yup.string().email('Invalid email format').required('Email is required'),
+      password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+      departments: Yup.array().min(1, 'Select at least one department'),
+      roles: Yup.array().min(1, 'Select at least one role'),
+    }),
+    onSubmit: async (values) => {
+      await handleFormSubmit(values); // Call handleFormSubmit with formik values
+    },
+  });
+  
 
   return (
     <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleFormSubmit}>
+      <form style={styles.form} onSubmit={formik.handleSubmit}>
         <h2>Add User</h2>
         
-        {/* Name Input */}
-        <div style={styles.formGroup}>
+         {/* Name Input */}
+         <div style={styles.formGroup}>
           <label htmlFor="name">Name:</label>
+          <br />
           <input
             type="text"
             id="name"
             name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             style={styles.input}
+            className={formik.touched.name && formik.errors.name ? styles.errorInput : ''}
           />
+          {formik.touched.name && formik.errors.name && (
+            <div style={{ color: 'red' }}>{formik.errors.name}</div>
+          )}
         </div>
-  
+
         {/* Email Input */}
         <div style={styles.formGroup}>
           <label htmlFor="email">Email:</label>
+          <br />
           <input
-            type="email"
             id="email"
             name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
+            type="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             style={styles.input}
+            className={formik.touched.email && formik.errors.email ? styles.errorInput : ''}
           />
+          {formik.touched.email && formik.errors.email && (
+            <div style={{ color: 'red' }}>{formik.errors.email}</div>
+          )}
         </div>
-  
+
         {/* Password Input */}
         <div style={styles.formGroup}>
           <label htmlFor="password">Password:</label>
+          <br />
           <input
-            type="password"
             id="password"
             name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            required
+            type="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             style={styles.input}
+            className={formik.touched.password && formik.errors.password ? styles.errorInput : ''}
           />
-        </div>
-  
-        {/* Departments Field */}
-        <div style={styles.formGroup}>
-          <label htmlFor="departments">Departments:</label>
-          <div
-            style={styles.selectInput}
-            onClick={() => handleInputClick('departments')}
-          >
-            {formData.departments.map(id => {
-              const department = departments.find(d => d.id === id);
-              return (
-                department && (
-                  <span key={id} style={styles.tag}>
-                    {department.name}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent input field click
-                        removeSelectedItem('departments', id); // Remove selected department
-                      }}
-                      style={styles.removeTagButton}
-                    >
-                      x
-                    </button>
-                  </span>
-                )
-              );
-            })}
-            {formData.departments.length === 0 && <span>Select Departments</span>}
-          </div>
-  
-          {dropdownVisible && selectedOptionType === 'departments' && (
-            <div style={styles.dropdown}>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search departments"
-                style={styles.dropdownSearch}
-              />
-              {filterOptions(departments).map(department => (
-                <div
-                  key={department.id}
-                  style={styles.dropdownItem}
-                  onClick={() => handleSelectItem(department)}
-                >
-                  {department.name}
-                </div>
-              ))}
-            </div>
+          {formik.touched.password && formik.errors.password && (
+            <div style={{ color: 'red' }}>{formik.errors.password}</div>
           )}
         </div>
   
-        {/* Roles Field */}
-        <div style={styles.formGroup}>
-          <label htmlFor="roles">Roles:</label>
-          <div
-            style={styles.selectInput}
-            onClick={() => handleInputClick('roles')}
-          >
-            {formData.roles.map(id => {
-              const role = roles.find(r => r.id === id);
-              return (
-                role && (
-                  <span key={id} style={styles.tag}>
-                    {role.name}
-                    <button
-                      type="button"
-                      onClick={() => removeSelectedItem('roles', id)}
-                      style={styles.removeTagButton}
-                    >
-                      x
-                    </button>
-                  </span>
-                )
-              );
-            })}
-            {formData.roles.length === 0 && <span>Select Roles</span>}
+         {/* Departments Field */}
+   <div style={styles.formGroup}>
+   <label htmlFor="departments">Departments:</label>
+   <div
+     style={styles.selectInput}
+     onClick={() => handleInputClick('departments')}
+   >
+     {formData.departments.map(id => {
+       const department = departments.find(d => d.id === id);
+       return (
+         department && (
+           <span key={id} style={styles.tag}>
+             {department.name}
+             <button
+             type="button"
+             onClick={() => {
+               removeSelectedItem('departments', id);
+               formik.setFieldTouched('departments', true);  // Mark as touched when removing
+               formik.setFieldValue(
+                 'departments',
+                 formData.departments.filter((departmentId) => departmentId !== id),
+               );  // Update Formik value when removing
+             }}
+             style={styles.removeTagButton}
+           >
+               x
+             </button>
+           </span>
+         )
+       );
+     })}
+     {formData.departments.length === 0 && <span>Select Departments</span>}
+     {/* here code the formik */}
+
+   </div>
+     {formik.touched.departments && formik.errors.departments ? (
+       <div style={{color:"red"}}>{formik.errors.departments}</div>
+     ) : null}
+
+   {dropdownVisible && selectedOptionType === 'departments' && (
+     <div style={styles.dropdown}>
+       <input
+         type="text"
+         value={searchQuery}
+         onChange={handleSearchChange}
+         placeholder="Search departments"
+         style={styles.dropdownSearch}
+       />
+       {filterOptions(departments).map(department => (
+         <div
+           key={department.id}
+           style={styles.dropdownItem}
+           onClick={() => {
+             handleSelectItem(department);
+             formik.setFieldTouched('departments', true);  // Mark as touched when selecting
+             formik.setFieldValue(
+               'departments',
+               [...formData.departments, department.id],
+               true, // Ensure Formik revalidates on change
+             );
+           }}
+         >
+           {department.name}
+         </div>
+       ))}
+     </div>
+   )}
+ </div>
+
+ {/* Roles Field */}
+ <div style={styles.formGroup}>
+ <label htmlFor="roles">Roles:</label>
+ <div
+   style={styles.selectInput}
+   onClick={() => handleInputClick('roles')}
+ >
+   {formData.roles.map((id) => {
+     const role = roles.find((r) => r.id === id);
+     return (
+       role && (
+         <span key={id} style={styles.tag}>
+           {role.name}
+           <button
+             type="button"
+             onClick={() => {
+               removeSelectedItem('roles', id);
+               formik.setFieldTouched('roles', true);  // Mark as touched when removing
+               formik.setFieldValue(
+                 'roles',
+                 formData.roles.filter((roleId) => roleId !== id),
+               );  // Update Formik value when removing
+             }}
+             style={styles.removeTagButton}
+           >
+             x
+           </button>
+         </span>
+       )
+     );
+   })}
+   {formData.roles.length === 0 && <span>Select Roles</span>}
+ </div>
+ {dropdownVisible && selectedOptionType === 'roles' && (
+   <div style={styles.dropdown}>
+     <input
+       type="text"
+       value={searchQuery}
+       onChange={handleSearchChange}
+       placeholder="Search roles"
+       style={styles.dropdownSearch}
+     />
+     {filterOptions(roles).map((role) => (
+       <div
+         key={role.id}
+         style={styles.dropdownItem}
+         onClick={() => {
+           handleSelectItem(role);
+           formik.setFieldTouched('roles', true);  // Mark as touched when selecting
+           formik.setFieldValue(
+             'roles',
+             [...formData.roles, role.id],
+             true, // Ensure Formik revalidates on change
+           );
+         }}
+       >
+         {role.name}
+       </div>
+     ))}
+   </div>
+ )}
+ {/* Error message for empty roles */}
+ {formik.touched.roles && formik.errors.roles ? (
+   <div style={{ color: 'red' }}>{formik.errors.roles}</div>
+ ) : null}
+</div>
+  
+       {loading ? (
+          <div style={styles.loader}>
+            <span>Loading...</span>
           </div>
-  
-          {dropdownVisible && selectedOptionType === 'roles' && (
-            <div style={styles.dropdown}>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search roles"
-                style={styles.dropdownSearch}
-              />
-              {filterOptions(roles).map(role => (
-                <div
-                  key={role.id}
-                  style={styles.dropdownItem}
-                  onClick={() => handleSelectItem(role)}
-                >
-                  {role.name}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-  
-        {/* Submit Button */}
-        <button type="submit" style={styles.submitButton}>
-          Submit
-        </button>
+        ) : (
+          <button type="submit" style={styles.submitButton} disabled={formik.isSubmitting}>
+            Submit
+          </button>
+        )}
       </form>
       
       {/* Permissions Div */}
