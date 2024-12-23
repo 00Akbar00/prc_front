@@ -3,6 +3,8 @@ import { getRoles } from "../../services/roleServices";
 import { getPermissions } from "../../services/permissionServices";
 import { assignPermissionsToRole } from "../../services/permissionServices"; 
 import Select from "react-select";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { styles } from "../../styles/styles";
 
 const ShowRoleList = ({ styles }) => {
@@ -10,6 +12,7 @@ const ShowRoleList = ({ styles }) => {
   const [loading, setLoading] = useState(true);
   const [permissions, setPermissions] = useState([]);
   const [rolePermissions, setRolePermissions] = useState({});
+  const [buttonLoading, setButtonLoading] = useState({}); // Track loading state for each button
 
   // Fetch roles and permissions when the component mounts
   useEffect(() => {
@@ -18,10 +21,6 @@ const ShowRoleList = ({ styles }) => {
         const roleResponse = await getRoles();
         const permissionResponse = await getPermissions();
 
-        // Log permissions for debugging
-        console.log("Permissions:", permissionResponse.data.permissions);
-
-        // Update state with roles and permissions
         setRoles(roleResponse.data.roles);
         setPermissions(
           permissionResponse.data.permissions.map((permission) => ({
@@ -52,15 +51,30 @@ const ShowRoleList = ({ styles }) => {
     const selectedPermissions = rolePermissions[roleId] || [];
     const permissionIds = selectedPermissions.map((permission) => permission.value);
 
+    // Set button loading state
+    setButtonLoading((prev) => ({ ...prev, [roleId]: true }));
+
     try {
-      // Send API request to assign permissions to the role
       const response = await assignPermissionsToRole(roleId, permissionIds);
 
       console.log(`Permissions assigned to role ${roleId}:`, response.data);
-      alert("Permissions successfully assigned!");
+      toast.success("Permissions successfully assigned!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
     } catch (error) {
       console.error("Error assigning permissions:", error);
-      alert("Failed to assign permissions. Please try again.");
+      toast.error("Failed to assign permissions. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
+    } finally {
+      // Reset button loading state
+      setButtonLoading((prev) => ({ ...prev, [roleId]: false }));
     }
   };
 
@@ -102,23 +116,34 @@ const ShowRoleList = ({ styles }) => {
                 <button
                   style={{
                     padding: "5px 10px",
-                    backgroundColor: "#007bff",
+                    backgroundColor: buttonLoading[role.id] ? "#6c757d" : "#007bff", // Change background color when loading
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
-                    cursor: "pointer",
+                    cursor: buttonLoading[role.id] ? "not-allowed" : "pointer", // Disable cursor
                   }}
-                  onClick={() => handleAssignPermissions(role.id)} // Button click to assign permissions
+                  onClick={() => handleAssignPermissions(role.id)}
+                  disabled={buttonLoading[role.id]} // Disable button when loading
                 >
-                  Assign Permissions
+                  {buttonLoading[role.id] ? "Assigning..." : "Assign Permissions"}
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={true}
+        theme="colored"
+        style={{
+          zIndex: 9999,
+        }}
+      />
     </div>
   );
 };
 
 export default ShowRoleList;
+
