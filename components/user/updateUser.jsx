@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select"; // Import react-select
-import { getUsers, updateUser } from "../../services/userServices";
+import { getUsers, updateUser, deleteUser } from "../../services/userServices";
 import { getDepartments } from "../../services/departmentServices";
 import { getRoles } from "../../services/roleServices";
 import * as Yup from "yup";
@@ -101,6 +101,23 @@ const UpdateUsers = ({ styles }) => {
     }
   };
 
+  const handleDelete = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
+      return; // Confirm before deleting
+    }
+
+    try {
+      const response = await deleteUser(userId); // Call the delete API function
+      alert(response?.message || 'User deleted successfully');
+
+      // Update the users list by filtering out the deleted user
+      setUsers(users.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    }
+  };
+
   const handleChange = (userId, field, value) => {
     setFormValues((prev) => ({
       ...prev,
@@ -126,6 +143,7 @@ const UpdateUsers = ({ styles }) => {
             <th style={styles.tableHeader}>Departments</th>
             <th style={styles.tableHeader}>Roles</th>
             <th style={styles.tableHeader}>Actions</th>
+            <th style={styles.tableHeader}>Delete User</th>
           </tr>
         </thead>
         <tbody>
@@ -203,6 +221,16 @@ const UpdateUsers = ({ styles }) => {
                 >
                   Update
                 </button>
+              </td>
+
+              {/* Update Button */}
+              <td style={styles.tableCell}>
+                  <button
+                    style={styles.deleteButton}
+                    onClick={() => handleDelete(user.id)} // Call handleDelete with user ID
+                  >
+                    Delete
+                  </button>
               </td>
             </tr>
           ))}
