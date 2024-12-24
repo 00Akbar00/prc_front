@@ -12,6 +12,12 @@ const UpdateUsers = ({ styles }) => {
   const [loading, setLoading] = useState(true);
   const [formValues, setFormValues] = useState({});
   const [errors, setErrors] = useState({}); // Store validation errors
+  const [modal, setModal] = useState({
+    isOpen: false, // Controls modal visibility
+    title: "", // Title for the modal
+    message: "", // Message to display
+  });
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +73,10 @@ const UpdateUsers = ({ styles }) => {
       .min(1, "At least one role must be selected"),
   });
 
+  const closeModal = () => {
+    setModal({ isOpen: false, title: "", message: "" });
+  };
+  
   const validateFields = async (userId) => {
     try {
       await validationSchema.validate(formValues[userId], { abortEarly: false });
@@ -102,21 +112,25 @@ const UpdateUsers = ({ styles }) => {
   };
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) {
-      return; // Confirm before deleting
-    }
-
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+  
     try {
-      const response = await deleteUser(userId); // Call the delete API function
-      alert(response?.message || 'User deleted successfully');
-
-      // Update the users list by filtering out the deleted user
-      setUsers(users.filter((user) => user.id !== userId));
+      const response = await deleteUser(userId);
+      setUsers(users.filter((user) => user.id !== userId)); // Update user list
+      setModal({
+        isOpen: true,
+        title: "Success",
+        message: response?.message || "User deleted successfully!",
+      });
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Failed to delete user');
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Failed to delete user. Please try again later.",
+      });
     }
   };
+  
 
   const handleChange = (userId, field, value) => {
     setFormValues((prev) => ({
@@ -223,7 +237,7 @@ const UpdateUsers = ({ styles }) => {
                 </button>
               </td>
 
-              {/* Update Button */}
+              {/* Delete Button */}
               <td style={styles.tableCell}>
                   <button
                     style={styles.deleteButton}
