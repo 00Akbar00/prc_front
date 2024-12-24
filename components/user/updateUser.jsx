@@ -61,6 +61,8 @@ const UpdateUsers = ({ styles }) => {
     fetchData();
   }, []);
 
+
+
   const handleShowModal = (userId) => {
     setModal({
       isOpen: true,
@@ -84,6 +86,52 @@ const UpdateUsers = ({ styles }) => {
         message: "",
         userToDelete: null,
       });
+    }
+  };
+  
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .required("Name is required")
+      .matches(/^[A-Za-z\s]+$/, "Name must not contain numbers or special characters"),
+    departments: Yup.array()
+      .of(Yup.number().positive("Invalid department ID"))
+      .min(1, "At least one department must be selected"),
+    roles: Yup.array()
+      .of(Yup.number().positive("Invalid role ID"))
+      .min(1, "At least one role must be selected"),
+  });
+
+  const validateFields = async (userId) => {
+    try {
+      await validationSchema.validate(formValues[userId], { abortEarly: false });
+      setErrors((prev) => ({ ...prev, [userId]: {} })); // Clear errors if validation passes
+      return true;
+    } catch (validationErrors) {
+      const formattedErrors = {};
+      validationErrors.inner.forEach((error) => {
+        formattedErrors[error.path] = error.message;
+      });
+      setErrors((prev) => ({ ...prev, [userId]: formattedErrors }));
+      return false;
+    }
+  };
+
+  const handleUpdate = async (userId) => {
+    const isValid = await validateFields(userId);
+    if (!isValid) return;
+
+    try {
+      const user = formValues[userId];
+      await updateUser(userId, {
+        id: userId,
+        name: user.name,
+        email: user.email, // Email remains non-editable
+        departmentIds: user.departments, // Pass department IDs
+        roleIds: user.roles, // Pass role IDs
+      });
+      alert("User updated successfully!");
+    } catch (error) {
+      alert(`Error updating user: ${error.message}`);
     }
   };
 
