@@ -25,11 +25,11 @@ const UpdateUsers = ({ styles }) => {
           initialFormValues[user.id] = {
             name: user.name,
             email: user.email,
-            departments: user.departments || [],
-            roles: user.roles || [],
+            departments: user.departments?.map((dept) => dept.id) || [],
+            roles: user.roles?.map((role) => role.id) || [], // Extract role IDs
           };
         });
-
+  
         setUsers(usersResponse?.data?.users || []);
         setDepartments(
           departmentsResponse?.data?.departments?.map((dept) => ({
@@ -43,17 +43,17 @@ const UpdateUsers = ({ styles }) => {
             label: role.name,
           })) || []
         );
-        setFormValues(initialFormValues);
+        setFormValues(initialFormValues); // Set initial form values
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
-
+  
   // Yup schema for validation
   const validationSchema = Yup.object().shape({
     name: Yup.string()
