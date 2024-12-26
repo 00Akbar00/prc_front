@@ -2,10 +2,14 @@ import axios from "axios";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Function to get users with their departments and roles
-export const getUsers = async () => {
-  const response = await axios.get(`${API_BASE_URL}/Users`);
+export const getUsers = async (page) => {
+  const response = await axios.get(`${API_BASE_URL}/Users`, {
+    params: { page }, // Pass page directly, not as a nested object
+  });
   return response;
 };
+
+
 
 // Function to add a user
 // userServices.js
