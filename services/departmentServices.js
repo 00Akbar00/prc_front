@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Function to get departments
 export const getDepartments = async () => {
-  const response = await axios.get(`${API_BASE_URL}/departments`);
+  const response = await axios.get(`${API_BASE_URL}/api/department/departments`);
   return response;
 };
 
@@ -11,7 +11,7 @@ export const getDepartments = async () => {
 export const addDepartment = async (payload) => {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/addDepartment`,
+      `${API_BASE_URL}/api/department/addDepartment`,
       payload // Send { name: "AnyDepartment" }
     );
     return { success: true, data: response.data };
@@ -24,7 +24,7 @@ export const addDepartment = async (payload) => {
 
 export const deleteDepartment = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/deleteDepartment/${id}`);
+    const response = await axios.delete(`${API_BASE_URL}/api/department/deleteDepartment/${id}`);
     return response.data;  // Returning the response data
   } catch (error) {
     console.error('Error in deleting department:', error);

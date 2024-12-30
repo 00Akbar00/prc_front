@@ -3,14 +3,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
 export const getPermissions = async () => {
-    const response = await axios.get(`http://localhost:8082/permissions`);
+    const response = await axios.get(`http://localhost:8082/api/permission/permissions`);
     return response;
 };
 
 export const assignPermissionsToRole = async (roleId, permissionIds) => {
     try {
       const response = await axios.post(
-        `http://localhost:8082/assign-permissions`,
+        `http://localhost:8082/api/permission/assign-permissions`,
         { roleId, permissions: permissionIds }
       );
       return response;
