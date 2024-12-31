@@ -3,21 +3,14 @@ import { getUsers } from '@/services/userServices';
 import Box from '../box/box'; // Import the Box component
 import { styles } from './tableStyle';
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import axios from 'axios';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 const Table = ({ style }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isBoxVisible, setBoxVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [formData, setFormData] = useState({
-    basicSalary: '',
-    deductions: '',
-    netSalary: '',
-    month: '',
-    year: '',
-    userId: '',
-  });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -37,7 +30,8 @@ const Table = ({ style }) => {
 
   const handleAddSlipClick = (user) => {
     setSelectedUser(user);
-    setFormData({ ...formData, userId: user.id });
+    formik.resetForm();
+    formik.setFieldValue('userId', user.id);
     setBoxVisible(true);
   };
 
@@ -45,20 +39,48 @@ const Table = ({ style }) => {
     setBoxVisible(false);
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const formik = useFormik({
+    initialValues: {
+      basicSalary: '',
+      deductions: '',
+      netSalary: '',
+      month: '',
+      year: '',
+      userId: '',
+    },
+    validationSchema: Yup.object({
+      basicSalary: Yup.number().required('Basic Salary is required').positive('Must be positive'),
+      deductions: Yup.number().positive('Must be positive'),
+      netSalary: Yup.number().required('Net Salary is required').positive('Must be positive'),
+      month: Yup.string().required('Month is required'),
+      year: Yup.number().required('Year is required').min(2000, 'Year must be after 2000').max(new Date().getFullYear(), 'Year cannot be in the future'),
+      userId: Yup.string().required('User ID is required'),
+    }),
+    onSubmit: async (values) => {
+      try {
+        console.log('Submitting:', values);
+        // const response = await axios.post('/api/salary', values);
+        // console.log(response.data);
+        handleCloseBox();
+      } catch (error) {
+        console.error('Error adding salary slip:', error);
+      }
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // try {
-    //   const response = await axios.post('/api/salary', formData);
-    //   console.log(response.data);
-    //   handleCloseBox();
-    // } catch (error) {
-    //   console.error('Error adding salary slip:', error);
-    // }
+  const handleSubmitButtonClick = () => {
+    // Mark all fields as touched to show all errors
+    formik.setTouched({
+      basicSalary: true,
+      deductions: true,
+      netSalary: true,
+      month: true,
+      year: true,
+      userId: true,
+    });
+  
+    // Trigger Formik's submit handling
+    formik.handleSubmit();
   };
 
   return (
@@ -104,17 +126,20 @@ const Table = ({ style }) => {
           ))}
         </tbody>
       </table>
-  
+
       {isBoxVisible && (
         <Box onClose={handleCloseBox}>
           <h2>Add Salary Slip for {selectedUser?.name}</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={formik.handleSubmit}>
             <TextField
               label="Basic Salary"
               name="basicSalary"
-              type="number"
-              value={formData.basicSalary}
-              onChange={handleChange}
+              // type="number"
+              value={formik.values.basicSalary}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.basicSalary && Boolean(formik.errors.basicSalary)}
+              helperText={formik.touched.basicSalary && formik.errors.basicSalary}
               fullWidth
               margin="normal"
               required
@@ -122,18 +147,24 @@ const Table = ({ style }) => {
             <TextField
               label="Deductions"
               name="deductions"
-              type="number"
-              value={formData.deductions}
-              onChange={handleChange}
+              //type="number"
+              value={formik.values.deductions}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.deductions && Boolean(formik.errors.deductions)}
+              helperText={formik.touched.deductions && formik.errors.deductions}
               fullWidth
               margin="normal"
             />
             <TextField
               label="Net Salary"
               name="netSalary"
-              type="number"
-              value={formData.netSalary}
-              onChange={handleChange}
+              //type="number"
+              value={formik.values.netSalary}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.netSalary && Boolean(formik.errors.netSalary)}
+              helperText={formik.touched.netSalary && formik.errors.netSalary}
               fullWidth
               margin="normal"
               required
@@ -142,30 +173,42 @@ const Table = ({ style }) => {
               <InputLabel>Month</InputLabel>
               <Select
                 name="month"
-                value={formData.month}
-                onChange={handleChange}
+                value={formik.values.month}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.month && Boolean(formik.errors.month)}
               >
                 <MenuItem value="January">January</MenuItem>
                 <MenuItem value="February">February</MenuItem>
                 <MenuItem value="March">March</MenuItem>
                 {/* Add other months as needed */}
               </Select>
+              {formik.touched.month && formik.errors.month && (
+                <p style={{ color: 'red', fontSize: '0.8em' }}>{formik.errors.month}</p>
+              )}
             </FormControl>
             <TextField
               label="Year"
               name="year"
-              type="number"
-              value={formData.year}
-              onChange={handleChange}
+              //type="number"
+              value={formik.values.year}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.year && Boolean(formik.errors.year)}
+              helperText={formik.touched.year && formik.errors.year}
               fullWidth
               margin="normal"
               required
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-              <Button type="submit" variant="contained" color="primary" style={{ marginRight: '10px' }}>
-                View Slip
-              </Button>
-              <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained" color="primary" style={{ marginRight: '10px' }}>
+              View Slip
+            </Button>
+             <Button 
+                type="button" 
+                variant="contained" 
+                color="primary" 
+                onClick={handleSubmitButtonClick}>
                 Add Salary Slip
               </Button>
             </div>
@@ -174,7 +217,6 @@ const Table = ({ style }) => {
       )}
     </div>
   );
-  
 };
 
 export default Table;
