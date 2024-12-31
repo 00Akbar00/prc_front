@@ -19,25 +19,35 @@ const UpdateUsers = ({ styles }) => {
     message: "", // Message to display
     userToDelete: null, // User ID to delete
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await getUsers();
+        setLoading(true);
+  
+        // Fetch users for the current page
+        const usersResponse = await getUsers(currentPage );
+        console.log(usersResponse)
+        const { users, totalPages } = usersResponse.data;
+  
+        // Fetch departments and roles (only needed once)
         const departmentsResponse = await getDepartments();
         const rolesResponse = await getRoles();
-
+  
         const initialFormValues = {};
-        usersResponse?.data?.users?.forEach((user) => {
+        users.forEach((user) => {
           initialFormValues[user.id] = {
             name: user.name,
             email: user.email,
             departments: user.departments?.map((dept) => dept.id) || [],
-            roles: user.roles?.map((role) => role.id) || [], // Extract role IDs
+            roles: user.roles?.map((role) => role.id) || [],
           };
         });
-
-        setUsers(usersResponse?.data?.users || []);
+  
+        // Update state
+        setUsers(users);
         setDepartments(
           departmentsResponse?.data?.departments?.map((dept) => ({
             value: dept.id,
@@ -50,18 +60,24 @@ const UpdateUsers = ({ styles }) => {
             label: role.name,
           })) || []
         );
-        setFormValues(initialFormValues); // Set initial form values
+        setFormValues(initialFormValues);
+        setTotalPages(totalPages);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, []);
+  }, [currentPage]); 
+  
 
-
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Update the current page state
+  };
+  
+  
 
   const handleShowModal = (userId) => {
     setModal({
@@ -277,6 +293,45 @@ const UpdateUsers = ({ styles }) => {
           ))}
         </tbody>
       </table>
+
+     {/* Pagination */}
+     <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <button
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          style={{
+            padding: "10px 20px",
+            margin: "0 5px",
+            backgroundColor: currentPage === 1 ? "#e9ecef" : "#007bff",
+            color: currentPage === 1 ? "#6c757d" : "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            fontSize: "16px",
+          }}
+        >
+          Previous
+        </button>
+        <span style={{ margin: "0 10px", fontSize: "16px" }}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          style={{
+            padding: "10px 20px",
+            margin: "0 5px",
+            backgroundColor: currentPage === totalPages ? "#e9ecef" : "#007bff",
+            color: currentPage === totalPages ? "#6c757d" : "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            fontSize: "16px",
+          }}
+        >
+          Next
+        </button>
+      </div>
   
       {/* Modal for Confirming Deletion */}
       <Modal
