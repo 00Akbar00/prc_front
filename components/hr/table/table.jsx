@@ -13,6 +13,7 @@ const Table = ({ style }) => {
     const fetchUsers = async () => {
       try {
         const response = await getUsers();
+        console.log(response.data.users)
         setUsers(response.data.users);
         setLoading(false);
       } catch (error) {
@@ -53,13 +54,16 @@ const Table = ({ style }) => {
               <td style={style.tableCell}>{user.name}</td>
               <td style={style.tableCell}>{user.email}</td>
               <td style={style.tableCell}>
-                <button
-                  className="button"
-                  style={style.actionButton}
-                  onClick={() => alert(`Viewing slip for ${user.name}`)}
-                >
-                  View Slip
-                </button>
+                {/* Render View Slip button only if user has salary data */}
+                {user.salaries.length > 0 ? (
+                  <button
+                    className="button"
+                    style={style.actionButton}
+                    onClick={() => alert(`Viewing slip for ${user.name}`)}
+                  >
+                    View Slip
+                  </button>
+                ) : null}
               </td>
               <td style={style.tableCell}>
                 <button
@@ -78,12 +82,6 @@ const Table = ({ style }) => {
       {isBoxVisible && (
         <Box onClose={handleCloseBox}>
           <h2>Add Salary Slip for {selectedUser?.name}</h2>
-          <button
-            onClick={() => alert(`Adding slip for ${selectedUser?.name}`)}
-            //style={{ marginTop: '10px' }}
-          >
-            Add Slip
-          </button>
         </Box>
       )}
     </div>
