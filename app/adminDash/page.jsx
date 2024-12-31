@@ -176,41 +176,54 @@ export default function AdminDash() {
     <div style={styles.container}>
       <SideBar onSectionChange={handleSectionChange} />
       <div style={styles.mainContent}>
-      <div style={styles.actionButtons}>
-  {['Add', 'Delete', 'Show'].map((action) => (
-    <button
-      key={action}
-      style={{
-        ...styles.actionButton,
-        backgroundColor: currentAction === action ? '#0056b3' : '#007bff',
-      }}
-      onClick={() => handleActionChange(action)}
-    >
-      {`${action} ${currentSection}`}
-    </button>
-  ))}
+        <div style={styles.actionButtons}>
+          {/* Conditionally render action buttons */}
+          {currentSection !== 'User' && ['Delete', 'Show'].map((action) => (
+            <button
+              key={action}
+              style={{
+                ...styles.actionButton,
+                backgroundColor: currentAction === action ? '#0056b3' : '#007bff',
+              }}
+              onClick={() => handleActionChange(action)}
+            >
+              {`${action} ${currentSection}`}
+            </button>
+          ))}
+          
+          {/* Show the Update button only for the User section */}
+          {currentSection === 'User' && (
+            <button
+              style={{
+                ...styles.actionButton,
+                backgroundColor: currentAction === 'Update' ? '#0056b3' : '#007bff',
+              }}
+              onClick={() => handleActionChange('Update')}
+            >
+              Manage Users
+            </button>
+          )}
   
-  {/* Show the Update button only for the User section */}
-  {currentSection === 'User' && (
-    <button
-      style={{
-        ...styles.actionButton,
-        backgroundColor: currentAction === 'Update' ? '#0056b3' : '#007bff',
-      }}
-      onClick={() => handleActionChange('Update')}
-    >
-      Update User
-    </button>
-  )}
-</div>
+          {/* Always show Add button */}
+          <button
+            style={{
+              ...styles.actionButton,
+              backgroundColor: currentAction === 'Add' ? '#0056b3' : '#007bff',
+            }}
+            onClick={() => handleActionChange('Add')}
+          >
+            {`Add ${currentSection}`}
+          </button>
+        </div>
         <div style={styles.contentArea}>{renderContent()}</div>
-        
+  
         {/* Logout Button */}
         <LogoutButton label="Logout" style={{ marginTop: '20px' }} className="logout-button" />
       </div>
       <ToastContainer />
     </div>
   );
+  
 }
 
 
