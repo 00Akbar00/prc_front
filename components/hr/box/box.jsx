@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { styles } from './style'; // Import the styles
+import { styles } from './boxStyle'; // Import the external styles
 
 const Box = ({ children, onClose, className, ...props }) => {
   const [isHovered, setIsHovered] = useState(false);

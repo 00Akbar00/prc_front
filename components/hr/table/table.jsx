@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { getUsers } from '@/services/userServices';
-import Box from './box/box'; // Import the Box component
+import Box from '../box/box'; // Import the Box component
+import { styles } from './tableStyle';
 
 const Table = ({ style }) => {
   const [users, setUsers] = useState([]);
@@ -15,7 +16,7 @@ const Table = ({ style }) => {
         setUsers(response.data.users);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
         setLoading(false);
       }
     };
@@ -25,11 +26,11 @@ const Table = ({ style }) => {
 
   const handleAddSlipClick = (user) => {
     setSelectedUser(user);
-    setBoxVisible(true); // Show the Box when the "Add Slip" button is clicked
+    setBoxVisible(true);
   };
 
   const handleCloseBox = () => {
-    setBoxVisible(false); // Hide the Box when the close action is triggered
+    setBoxVisible(false);
   };
 
   return (
@@ -75,27 +76,12 @@ const Table = ({ style }) => {
       </table>
 
       {isBoxVisible && (
-        <Box
-        onClose={handleCloseBox} // Pass the handleCloseBox function to Box
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: '1000',
-          maxWidth: '1200px',
-          width: '100%',
-          padding: '30px',
-          backgroundColor: '#eaf6ff', 
-          border: '1px solid #b3d9ff', 
-          borderRadius: '12px', // Rounded corners for a modern look
-          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)', // Soft shadow for a floating effect
-          color: '#003366', // Dark blue text color for contrast
-          overflow: 'hidden', // Prevent content overflow
-        }}
-      >
+        <Box onClose={handleCloseBox}>
           <h2>Add Salary Slip for {selectedUser?.name}</h2>
-          <button onClick={() => alert(`Adding slip for ${selectedUser?.name}`)} style={{ marginTop: '10px' }}>
+          <button
+            onClick={() => alert(`Adding slip for ${selectedUser?.name}`)}
+            //style={{ marginTop: '10px' }}
+          >
             Add Slip
           </button>
         </Box>
