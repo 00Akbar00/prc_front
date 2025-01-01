@@ -5,6 +5,7 @@ import { styles } from './tableStyle';
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import {addSalary} from '../../../services/salaryServices';
 
 const Table = ({ style }) => {
   const [users, setUsers] = useState([]);
@@ -50,7 +51,7 @@ const Table = ({ style }) => {
     },
     validationSchema: Yup.object({
       basicSalary: Yup.number().required('Basic Salary is required').positive('Must be positive'),
-      deductions: Yup.number().positive('Must be positive'),
+      deductions: Yup.number().min(0, 'Deductions cannot be negative'),
       netSalary: Yup.number().required('Net Salary is required').positive('Must be positive'),
       month: Yup.string().required('Month is required'),
       year: Yup.number().required('Year is required').min(2000, 'Year must be after 2000').max(new Date().getFullYear(), 'Year cannot be in the future'),
@@ -59,11 +60,15 @@ const Table = ({ style }) => {
     onSubmit: async (values) => {
       try {
         console.log('Submitting:', values);
-        // const response = await axios.post('/api/salary', values);
-        // console.log(response.data);
+        const response = await addSalary(values);
+        if (response.status === 201 || response.data.message === 'Salary slip created successfully') {
+          alert('Salary added successfully!');
+        }
+        console.log(response.data);
         handleCloseBox();
       } catch (error) {
         console.error('Error adding salary slip:', error);
+        alert('Failed to add salary slip. Please try again.');
       }
     },
   });
