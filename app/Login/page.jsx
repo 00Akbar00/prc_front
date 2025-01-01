@@ -67,10 +67,13 @@ const LoginPage = () => {
   
         // Navigate based on the role
         if (roleName === "Admin") {
-          
-          router.push("/adminDash"); // Redirect to admin dashboard
-        } else {
+          router.push("/adminDash"); 
+        } 
+        if(roleName === "User") {
           router.push("/userDash"); 
+        }
+        if(roleName === "HR"){
+          router.push("/hrDash")
         }
         console.log(roleName)
       } else {
