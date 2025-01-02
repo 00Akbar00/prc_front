@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers } from '@/services/userServices';
-import AddSlipForm from './addSlipForm'
+import AddSlipForm from './addSlipForm';
+import ManageSlip from './manageSlip';
 
 const Table = ({ style }) => {
   const [users, setUsers] = useState([]);
@@ -92,7 +93,7 @@ const Table = ({ style }) => {
       )}
       
       {isManageSlipBoxVisible && (
-        <AddSlipForm
+        <ManageSlip
           user={selectedUser}
           onClose={handleCloseBox}
         />
