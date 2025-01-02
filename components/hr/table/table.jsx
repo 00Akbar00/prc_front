@@ -5,7 +5,8 @@ import AddSlipForm from './addSlipForm'
 const Table = ({ style }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isBoxVisible, setBoxVisible] = useState(false);
+  const [isAddSlipBoxVisible, setAddSlipBoxVisible] = useState(false);
+  const [isManageSlipBoxVisible, setManageSlipBoxVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
@@ -26,11 +27,17 @@ const Table = ({ style }) => {
 
   const handleAddSlipClick = (user) => {
     setSelectedUser(user);
-    setBoxVisible(true);
+    setAddSlipBoxVisible(true);
+  };
+
+  const handleManageSlipClick = (user) => {
+    setSelectedUser(user);
+    setManageSlipBoxVisible(true);
   };
 
   const handleCloseBox = () => {
-    setBoxVisible(false);
+    setAddSlipBoxVisible(false);
+    setManageSlipBoxVisible(false);
   };
 
   return (
@@ -57,9 +64,9 @@ const Table = ({ style }) => {
                   <button
                     className="button"
                     style={style.actionButton}
-                    onClick={() => alert(`Viewing slip for ${user.name}`)}
+                    onClick={() => handleManageSlipClick(user)}
                   >
-                    View Slip
+                    Manage Slips
                   </button>
                 ) : null}
               </td>
@@ -77,7 +84,14 @@ const Table = ({ style }) => {
         </tbody>
       </table>
 
-      {isBoxVisible && (
+      {isAddSlipBoxVisible && (
+        <AddSlipForm
+          user={selectedUser}
+          onClose={handleCloseBox}
+        />
+      )}
+      
+      {isManageSlipBoxVisible && (
         <AddSlipForm
           user={selectedUser}
           onClose={handleCloseBox}
