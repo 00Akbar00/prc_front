@@ -6,14 +6,14 @@ const Box = ({ children, onClose, className, ...props }) => {
 
   return (
     <div className={className} style={styles.boxStyles} {...props}>
-      <button
+      {/* <button
         style={isHovered ? { ...styles.closeButtonStyles, ...styles.closeButtonHover } : styles.closeButtonStyles}
         onClick={onClose}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         &times;
-      </button>
+      </button> */}
       {children}
     </div>
   );
