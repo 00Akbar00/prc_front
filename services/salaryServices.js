@@ -20,3 +20,18 @@ export const addSalary = async (payload) => {
         return { success: false, message: error.response?.data?.message || error.message };
     }
 };
+
+export const deleteSalary = async (salaryId) => {
+    try {
+      if (!salaryId) {
+        throw new Error("Salary ID is required."); // Validate salaryId
+      }
+      const response = await axios.delete(`${API_BASE_URL}/api/salary/deleteSalary/${salaryId}`);
+      return { success: true, data: response.data }; // Return successful response
+    } catch (error) {
+      console.error("Error in deleteSalary:", error);
+      return { success: false, message: error.response?.data?.message || error.message };
+    }
+  };
+  
+  

@@ -10,7 +10,7 @@ import {
   Paper,
 } from "@mui/material";
 import Box from "../box/box";
-import { getSalary } from "@/services/salaryServices"; // Ensure you have the correct import
+import { getSalary, deleteSalary } from "@/services/salaryServices"; // Ensure you have the correct import
 
 const ManageSlip = ({ user, onClose }) => {
   const [salarySlips, setSalarySlips] = useState([]);
@@ -42,23 +42,23 @@ const ManageSlip = ({ user, onClose }) => {
     }
   }, [user?.id]);
 
-//   const handleDelete = async (id) => {
-//     if (window.confirm("Are you sure you want to delete this salary slip?")) {
-//       try {
-//         // Replace with actual DELETE API call for salary slip
-//         const response = await fetch(`/api/salaries/${id}`, {
-//           method: "DELETE",
-//         });
-//         if (response.ok) {
-//           setSalarySlips((prev) => prev.filter((slip) => slip.id !== id));
-//         } else {
-//           alert("Failed to delete salary slip.");
-//         }
-//       } catch (error) {
-//         console.error("Error deleting salary slip:", error);
-//       }
-//     }
-//   };
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this salary slip?")) {
+      try {
+        const response = await deleteSalary(id); // Ensure `id` is passed properly
+        if (response.success) {
+          setSalarySlips((prev) => prev.filter((slip) => slip.id !== id)); // Update state after successful deletion
+          alert("Salary slip deleted successfully.");
+        } else {
+          alert(response.message || "Failed to delete salary slip.");
+        }
+      } catch (error) {
+        console.error("Error deleting salary slip:", error);
+        alert("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
+  
 
   return (
     <Box>
