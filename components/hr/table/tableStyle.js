@@ -65,6 +65,30 @@ export const styles = {
       fontWeight: "bold",
       color: "#333",
       marginBottom: "20px",
+      marginLeft:"50px",
+      marginTop:"10px"
     },
+    logoutButtonContainer: {
+      position: "fixed", // or "absolute" depending on your needs
+      top: "8.5px",       // Adjust this value as needed
+      right: "40px",     // Align it to the right
+      zIndex: 1000,      // Make sure it's on top of other elements
+    },
+    logoutButton: {
+      padding: "10px 20px",
+      backgroundColor: "#dc3545", // Red color for the logout button
+      color: "#fff",
+      fontSize: "14px",
+      fontWeight: "bold",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease, transform 0.2s ease",
+    },
+    logoutButtonHover: {
+      backgroundColor: "#c82333",
+      transform: "scale(1.05)",
+    },
+    
 };
   

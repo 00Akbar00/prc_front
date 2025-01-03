@@ -19,7 +19,8 @@ export function middleware(req) {
 
   // Role-based access control
   if ((url.includes('/userDash') && role !== 'User') || 
-      (url.includes('/adminDash') && role !== 'Admin')) {
+      (url.includes('/adminDash') && role !== 'Admin') ||
+      (url.includes('/hrDash') && role !== 'HR')) {
     // Expire cookies if unauthorized access is attempted
     const response = new NextResponse(
       JSON.stringify({ message: 'You are not authorized to access this page.', status: 403 }),
@@ -37,5 +38,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/userDash', '/adminDash'], // Protect these routes
+  matcher: ['/userDash', '/adminDash', '/hrDash'], // Protect these routes
 };
