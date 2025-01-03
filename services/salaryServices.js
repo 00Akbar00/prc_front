@@ -32,6 +32,15 @@ export const deleteSalary = async (salaryId) => {
       console.error("Error in deleteSalary:", error);
       return { success: false, message: error.response?.data?.message || error.message };
     }
+};
+
+export const updateSalary = async (id, payload) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/api/salary/updateSalary/${id}`, payload);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || error.message };
+    }
   };
   
   
